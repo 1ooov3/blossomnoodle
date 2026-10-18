@@ -350,4 +350,87 @@
         </div>
     </div>
 </body>
+<style>
+    /* 하단에 부드럽게 나타나는 "지원하지 않는 기능입니다." 알림(토스트) 스타일 */
+    .toast-alert {
+        position: absolute;
+        bottom: 110px; /* 하단 독 바 바로 위에 위치하도록 조정 */
+        left: 50%;
+        transform: translate(-50%, 50%);
+        background-color: rgba(0, 0, 0, 0.85);
+        color: #ffffff;
+        padding: 10px 22px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 400;
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    /* 알림창이 활성화되었을 때 위로 슥 올라오며 나타나는 효과 */
+    .toast-alert.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+</style>
+<!-- 동적 알림창 레이어 주입 -->
+<div id="custom-toast" class="toast-alert">지원하지 않는 기능입니다.</div>
+<script>
+    // 1. 기존에 임시로 설정되어 있던 onclick 속성들을 요청하신 새 파일 주소로 완벽하게 변경
+    const allApps = document.querySelectorAll('.app-item');
+    const allDockApps = document.querySelectorAll('.dock-item');
+    // [일반 어플 레이어 주소 매핑 변경]
+    allApps.forEach(app => {
+        const appName = app.querySelector('.app-name').textContent.trim();
+        
+        if (appName === "카카오톡") {
+            app.setAttribute('onclick', "location.href='kakao.html'");
+        } else if (appName === "Instagram") {
+            app.setAttribute('onclick', "location.href='insta.html'");
+        } else if (appName === "갤러리") {
+            app.setAttribute('onclick', "location.href='gallery.html'");
+        } else if (appName === "캘린더") {
+            app.setAttribute('onclick', "location.href='calender.html'");
+        } 
+        // 미지원 어플 분기 처리 (Melon, Chat GPT, 라프텔)
+        else if (appName === "Melon" || appName === "Chat GPT" || appName === "라프텔") {
+            app.setAttribute('onclick', "showUnsupportedToast()");
+        }
+    });
+    // [하단 독 바 어플 주소 매핑 변경]
+    allDockApps.forEach(dockApp => {
+        const imgAlt = dockApp.querySelector('img').getAttribute('alt');
+        
+        if (imgAlt === "전화") {
+            dockApp.setAttribute('onclick', "location.href='call.html'");
+        } else if (imgAlt === "문자") {
+            dockApp.setAttribute('onclick', "location.href='message.html'");
+        } else if (imgAlt === "유튜브") {
+            dockApp.setAttribute('onclick', "location.href='youtube.html'");
+        } 
+        // 미지원 어플 분기 처리 (플레이스토어)
+        else if (imgAlt === "플레이스토어") {
+            dockApp.setAttribute('onclick', "showUnsupportedToast()");
+        }
+    });
+    // 2. 미지원 어플 클릭 시 맨 아래에 경고 문구를 띄우는 모션 함수
+    let toastTimeout;
+    function showUnsupportedToast() {
+        const toast = document.getElementById('custom-toast');
+        
+        // 연속 클릭 시 타이머 초기화 처리
+        clearTimeout(toastTimeout);
+        
+        // 즉시 알림창 띄우기
+        toast.classList.add('show');
+        
+        // 2초 뒤에 다시 부드럽게 사라지도록 설정
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2000);
+    }
+</script>
 </html>
