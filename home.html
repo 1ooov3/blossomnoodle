@@ -221,13 +221,15 @@
             align-items: center;
             cursor: pointer;
         }
-        .dock-icon {
-    width: 54px;
-    height: 54px;
-    border-radius: 16px;       /* 다른 앱들과 똑같이 모서리를 둥글게 깎음 */
-    object-fit: contain;       /* 원본 사진의 비율을 훼손하지 않고 틀 안에 맞춤 */
-    background-color: #ffffff; /* 길쭉한 여백이 생기더라도 흰색 정사각형 패널처럼 보이게 채움 */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+   .dock-icon-wrapper {
+    width: 56px;  /* 상단 앱들과 크기 균형 일치(56px) */
+    height: 56px; /* 상단 앱들과 크기 균형 일치(56px) */
+    border-radius: 16px; /* 모서리를 둥글게 깎음 */
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent; /* 미관을 해치던 거대한 흰색 바탕 사각형을 완전히 투명하게 제거 */
     transition: transform 0.15s;
 }
         .dock-item:active .dock-icon {
