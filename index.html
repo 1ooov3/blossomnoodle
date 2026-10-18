@@ -30,7 +30,7 @@
             max-width: 375px;
             height: 100vh;
             max-height: 812px;
-            background-color: #000000; /* 아무 무늬 없는 검정 배경 */
+            background-color: #000000; /* 무늬 없는 검정 배경 */
             position: relative;
             overflow: hidden;
             display: flex;
@@ -38,7 +38,6 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
-        /* 데스크톱(PC) 브라우저 환경에서 폰 목업 테두리 부여 */
         @media (min-width: 450px) {
             .phone-frame {
                 border: 12px solid #222222;
@@ -117,12 +116,12 @@
             background-color: rgba(255, 255, 255, 0.25);
         }
 
-        /* 카카오톡 앱 아이콘 (노란색 약간 둥근 네모 + 갈색 말풍선) */
+        /* 보낸 이미지 사양을 맞춘 카카오톡 앱 아이콘 구현 */
         .kakaotalk-icon {
             width: 42px;
             height: 42px;
-            background-color: #FEE500;
-            border-radius: 14px;
+            background-color: #FEE500; /* 노란색 배경 */
+            border-radius: 11px;       /* 약간 둥근 네모 */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -130,26 +129,37 @@
             position: relative;
         }
 
-        /* CSS로 구현한 갈색 말풍선 기호 */
+        /* 갈색 말풍선 몸통 */
         .kakaotalk-icon::before {
-            content: "";
-            width: 18px;
-            height: 16px;
-            background-color: #3C1E1E;
-            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            content: "TALK";
+            font-family: "Arial Black", -apple-system, sans-serif;
+            font-size: 9px;
+            font-weight: 900;
+            color: #FEE500; /* 말풍선 내부 노란색 TALK 글자 */
+            letter-spacing: -0.5px;
+            width: 30px;
+            height: 24px;
+            background-color: #3C1E1E; /* 갈색 말풍선 */
+            border-radius: 50% 50% 50% 50% / 43% 43% 57% 57%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 1px;
             position: relative;
-            top: -1px;
+            z-index: 2;
         }
 
+        /* 갈색 말풍선 꼬리 */
         .kakaotalk-icon::after {
             content: "";
             position: absolute;
-            border-top: 5px solid #3C1E1E;
-            border-right: 5px solid transparent;
-            border-left: 3px solid transparent;
-            bottom: 13px;
-            left: 11px;
-            transform: rotate(-15deg);
+            border-top: 7px solid #3C1E1E;
+            border-right: 6px solid transparent;
+            border-left: 4px solid transparent;
+            bottom: 6px;
+            left: 10px;
+            transform: rotate(-13deg);
+            z-index: 1;
         }
 
         /* 알림 텍스트 콘텐츠 */
@@ -187,7 +197,7 @@
             text-overflow: ellipsis;
         }
 
-        /* 하단 소프트바/인디케이터 구역 (추후 내비게이션 확장을 위함) */
+        /* 하단 바 구역 */
         .bottom-bar {
             height: 30px;
             display: flex;
@@ -204,10 +214,9 @@
 </head>
 <body>
 
-    <!-- 갤럭시 스타일 휴대폰 프레임 -->
     <div class="phone-frame">
         
-        <!-- 상단 상태바 (시간 고정, 배터리 81% 고정) -->
+        <!-- 상단 상태바 (5시 2분, 배터리 81% 고정) -->
         <div class="status-bar">
             <span class="status-time">5:02</span>
             <div class="status-right">
@@ -228,7 +237,7 @@
 
             <!-- 카카오톡 알림 미리보기 창 -->
             <div class="notification-card" id="kakaoNotification">
-                <!-- 커스텀 노란색/갈색 말풍선 카톡 아이콘 -->
+                <!-- 고도화된 노란색/갈색 TALK 말풍선 카톡 아이콘 -->
                 <div class="kakaotalk-icon"></div>
                 
                 <!-- 알림 내용 -->
@@ -250,9 +259,7 @@
     </div>
 
     <script>
-        // 다음 단계(잠금 해제 또는 알림 클릭 상호작용) 확장을 위한 기본 이벤트 바인딩
         document.getElementById('kakaoNotification').addEventListener('click', function() {
-            // 이 자리에 다음 구현 단계의 액션을 연결할 예정입니다.
             console.log('카톡 알림 클릭됨');
         });
     </script>
