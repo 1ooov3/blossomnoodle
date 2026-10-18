@@ -101,20 +101,23 @@
     height: 100%;
 }
 
-/* 🎵 음악 재생바 위젯 패널 기본 뼈대 */
+/* 🔲 음악 탭 전체 틀 확장 (앨범아트가 커진 만큼 높이를 72px에서 110px로 확대) */
         .music-widget {
             background-color: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-radius: 22px;
             padding: 14px 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: flex !important;
+            flex-direction: column !important; /* 상하 2단 레이아웃 (손그림 구조) */
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
             margin-bottom: 40px;
             width: 100%;
-            position: relative; /* 안내 문구를 정밀 배치하기 위해 필수 추가 */
+            position: relative;
+            height: auto !important;
+            gap: 10px !important;
         }
         
         /* ⚠ [새로 추가] 노래 위젯 조금 위에 뜨는 경고 문구 스타일 */
@@ -135,87 +138,98 @@
         .music-warn-text.show {
             opacity: 1;
         } 
-<!-- 1. 음악 재생바 위젯 (손그림 가로형 - 가수명, 노래제목 크기/굵기 동일 버전) -->
-<div class="music-widget" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; padding: 14px 18px !important; gap: 12px !important; height: 72px !important;">
-    <!-- 노래탭 조금 위에 뜨는 동적 안내 문구 판 -->
-    <div id="music-warn" class="music-warn-text">재생할 수 있는 곡이 없습니다.</div>
-    
-    <!-- 왼쪽 정렬 구역: [앨범커버]  가수명 - 노래제목 -->
-    <div style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 12px !important; flex: 1 !important; min-width: 0 !important;">
-        <!-- 앨범커버 -->
-        <div id="album-art-btn" class="music-album-art" onclick="playCurrentLink()" style="cursor: pointer; width: 44px !important; height: 44px !important; border-radius: 12px !important; overflow: hidden !important; flex-shrink: 0 !important; display: flex !important; justify-content: center !important; align-items: center !important;">
-            <img id="album-img" src="firstlove.jpg" alt="앨범 표지" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" onerror="this.src='firstlove.jpeg'">
-        </div>
-        
-        <!-- 가수명 - 노래제목 레이아웃 (요청반영: 글자 크기와 굵기를 두껍고 시원하게 완전 동일 배치) -->
-        <div style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 6px !important; font-size: 14px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">
-            <!-- 가수명 -->
-            <span id="music-singer" style="font-weight: 600 !important; color: #ffffff !important; display: inline !important;">에피톤 프로젝트</span>
-            <!-- 중간 구분 대시 기호 -->
-            <span style="color: #ffffff !important; font-weight: 600 !important; display: inline !important;">-</span>
-            <!-- 노래제목 (가수명과 동일한 굵기 및 화이트 색상 동기화 세팅 완료) -->
-            <span id="music-name" style="font-weight: 600 !important; color: #ffffff !important; display: inline !important;">첫사랑</span>
-        </div>
-    </div>
-    
-    <!-- 오른쪽 정렬 구역: 재생 컨트롤 버튼들을 우측 끝 수평선에 고정 (중복 오류 원천 차단) -->
-    <div class="music-controls" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 14px !important; flex-shrink: 0 !important;">
-        <button class="control-btn" id="prev-track" aria-label="이전곡" style="background: none; border: none; cursor: pointer; display: flex; align-items: center;">
-            <svg width="16" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-        </button>
-        <button class="control-btn" aria-label="재생/일시정지" style="background: none; border: none; cursor: pointer; display: flex; align-items: center;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-        </button>
-        <button class="control-btn" id="next-track" aria-label="다음곡" style="background: none; border: none; cursor: pointer; display: flex; align-items: center;">
-            <svg width="16" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M16 6h2v12h-2zm-10.5 0v12l8.5-6z"/></svg>
-        </button>
-    </div>
-</div>
+ <!-- 1. 음악 재생바 위젯 (손그림 가로형 - 가수명, 노래제목 크기/굵기 동일 버전) -->
+            <div class="music-widget">
+                <!-- 노래탭 조금 위에 뜨는 동적 안내 문구 판 -->
+                <div id="music-warn" class="music-warn-text">재생할 수 있는 곡이 없습니다.</div>
+                
+                <!-- 상단층: [앨범커버(확대)]  가수명 - 노래제목 -->
+                <div class="music-info-side">
+                    <!-- 1. 요청사항 반영: 앨범아트 크기를 기존 44px에서 64px로 시원하게 확대 -->
+                    <div id="album-art-btn" class="music-album-art">
+                        <img id="album-img" src="firstlove.jpg" alt="앨범 표지" onerror="this.src='firstlove.jpeg'">
+                    </div>
+                    
+                    <!-- 2. 요청사항 반영: 가수이름과 노래제목을 앨범아트 '오른쪽 옆' 가로로 나란히 배치 -->
+                    <div class="music-meta">
+                        <span id="music-singer" class="music-title">에피톤 프로젝트</span>
+                        <span class="music-dash">-</span>
+                        <span id="music-name" class="music-artist">첫사랑</span>
+                    </div>
+                </div>
+                
+                <!-- 하단층: 재생 컨트롤 버튼 구역 (중앙 우측 정렬 유지) -->
+                <div class="music-controls">
+                    <button class="control-btn" id="prev-track" aria-label="이전곡">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    </button>
+                    <button class="control-btn" aria-label="재생/일시정지">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                    <button class="control-btn" id="next-track" aria-label="다음곡">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M16 6h2v12h-2zm-10.5 0v12l8.5-6z"/></svg>
+                    </button>
+                </div>
+            </div>
+  /* 앨범아트와 텍스트를 가로 일렬로 배치 */
         .music-info-side {
-            display: flex;         /* 요소들을 가로로 나열 */
-            flex-direction: row;   /* 강제로 세로 정렬을 해제하고 가로 정렬로 고정 */
-            align-items: center;   /* 세로축 기준으로 정중앙 정렬 */
-            gap: 12px;             /* 앨범아트와 글씨 사이의 쾌적한 간격 */
-            flex: 1;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 14px !important;
+            width: 100% !important;
         }
+        /* 📸 1. 앨범아트 크기 확대 고정 스타일 */
         .music-album-art {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #ff7e5f, #feb47b);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            width: 64px !important;  /* 기존 44px -> 64px로 대폭 확대 */
+            height: 64px !important; /* 기존 44px -> 64px로 대폭 확대 */
+            border-radius: 14px !important;
+            overflow: hidden !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+            flex-shrink: 0 !important;
         }
+        .music-album-art img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+        }
+        /* 🔄 2. 가수이름과 노래제목을 완벽한 가로 한 줄로 나열 */
         .music-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 6px !important;
+            flex: 1 !important;
         }
+        /* 🔤 글자 크기 및 두께 동일화 동기화 세팅 */
         .music-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #ffffff;
+            font-size: 14px !important;
+            font-weight: 600 !important; /* 두껍게 강조 */
+            color: #ffffff !important;
+        }
+        .music-dash {
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
         }
         .music-artist {
-            font-size: 11px;
-            color: #e0e0e0;
+            font-size: 14px !important; /* 가수명과 동일한 크기로 스케일업 */
+            color: #ffffff !important; /* 화이트로 색상 통일 */
+            font-weight: 600 !important; /* 가수명과 동일하게 두껍게 강조 */
         }
+        /* 하단 재생 컨트롤 버튼 가로 정렬 및 우측 정렬 */
         .music-controls {
-            display: flex;
-            align-items: center;
-            gap: 16px;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-end !important; /* 손그림처럼 우측 끝 정렬 */
+            gap: 20px !important;
+            width: 100% !important;
+            padding-right: 4px !important;
         }
-        .control-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
         /* 📱 중간부분: 일반 앱 그리드 격자 배열 (가로 4개 타겟층) */
         .apps-grid {
             flex: 1;
