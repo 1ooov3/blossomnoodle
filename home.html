@@ -548,6 +548,62 @@
     window.addEventListener('DOMContentLoaded', () => {
         updateMusicWidgetUI();
     });
+// ==========================================================
+// 기존 로직 변형 방지를 위한 독립형 음악 알림 추가 기능 모듈
+// ==========================================================
+(function() {
+    // 1. 이전곡 버튼에 독립적인 알림 트리거 추가 (기존 클릭 이벤트와 별개로 동작)
+    const prevBtn = document.getElementById('prev-track');
+    if (prevBtn) {
+        prevBtn.addEventListener('mousedown', function() {
+            // 현재 활성화된 트랙이 죠지(index 1)인 경우에만 독립적으로 알림 작동
+            if (typeof currentTrackIndex !== 'undefined' && currentTrackIndex === 1) {
+                triggerIndependentMusicWarn();
+            }
+        });
+        // 모바일 터치 환경 대응
+        prevBtn.addEventListener('touchstart', function() {
+            if (typeof currentTrackIndex !== 'undefined' && currentTrackIndex === 1) {
+                triggerIndependentMusicWarn();
+            }
+        });
+    }
 
+    // 2. 다음곡 버튼에 독립적인 알림 트리거 추가
+    const nextBtn = document.getElementById('next-track');
+    if (nextBtn) {
+        nextBtn.addEventListener('mousedown', function() {
+            // 현재 활성화된 트랙이 라라라러브송(index 2)인 경우에만 독립적으로 알림 작동
+            if (typeof currentTrackIndex !== 'undefined' && currentTrackIndex === 2) {
+                triggerIndependentMusicWarn();
+            }
+        });
+        // 모바일 터치 환경 대응
+        nextBtn.addEventListener('touchstart', function() {
+            if (typeof currentTrackIndex !== 'undefined' && currentTrackIndex === 2) {
+                triggerIndependentMusicWarn();
+            }
+        });
+    }
+
+    // 3. 노래 탭 바로 위에 알림을 띄우고 지우는 독립형 타이머 제어 함수
+    let independentWarnTimeout;
+    function triggerIndependentMusicWarn() {
+        const warnElement = document.getElementById('music-warn');
+        if (warnElement) {
+            // 기존 타이머를 리셋하여 연속 클릭 시에도 부드럽게 유지
+            clearTimeout(independentWarnTimeout);
+            
+            // "재생할 수 있는 곡이 없습니다" 텍스트 보장 및 노출
+            warnElement.textContent = "재생할 수 있는 곡이 없습니다.";
+            warnElement.classList.add('show');
+            
+            // 1.5초(1500ms) 후에 노래 탭 위에서 부드럽게 사라지도록 설정
+            independentWarnTimeout = setTimeout(function() {
+                warnElement.classList.remove('show');
+            }, 1500);
+        }
+    }
+})();
 </script>
 </html>
