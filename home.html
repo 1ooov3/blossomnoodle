@@ -201,38 +201,43 @@
             width: 100%;
         }
 
-        /* 🔲 아랫부분: 반투명 흰색 하단 고정 독(Dock) 바 영역 */
+   /* 🔲 4개 어플 전체를 하나로 예쁘게 감싸는 반투명 독(Dock) 패널 */
         .bottom-dock {
-            background-color: rgba(255, 255, 255, 0.25);
+            background-color: rgba(255, 255, 255, 0.25); /* 어플 전체를 감싸는 반투명한 흰색 박스 */
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: 28px;
-            padding: 12px 10px;
+            padding: 12px 14px;
             width: 100%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 12px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
             margin-bottom: 8px;
         }
+        /* ❌ 개별 어플을 가로막던 못생긴 흰색 직사각형 배경을 완전히 투명하게 삭제 */
         .dock-item {
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            background: transparent; /* 배경을 완전히 투명하게 고정 */
+            border: none;            /* 브라우저 기본 외곽선 삭제 */
+            outline: none;           /* 선택 시 생기는 푸른 선 삭제 */
+            padding: 0;
+            margin: 0;
+            width: 100%;
         }
-     /* 하단 고정 독 아이콘 전용 최적화 디자인 스타일 */
+        /* 📱 내 컴퓨터에서 올린 정사각형 아이콘 자체 디자인 정렬 */
         .dock-icon {
-            width: 56px;        /* 상단 어플 아이콘들과 완벽히 일치하는 크기 고정 */
-            height: 56px;       /* 상단 어플 아이콘들과 완벽히 일치하는 크기 고정 */
-            border-radius: 16px; /* 모서리를 부드러운 라운드 정사각형으로 예쁘게 깎음 */
-            object-fit: cover;   /* 직접 올린 사진 이미지 비율을 깨짐 없이 가득 채움 */
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            width: 56px;         /* 상단 카톡, 인스타와 완벽히 일치하는 크기 고정 */
+            height: 56px;        /* 상단 카톡, 인스타와 완벽히 일치하는 크기 고정 */
+            border-radius: 16px;  /* 모서리를 부드럽고 예쁘게 라운딩 처리 */
+            object-fit: cover;    /* 직접 올린 정사각형 사진 비율을 깨짐 없이 가득 채움 */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transition: transform 0.15s;
         }
-        .dock-item:active .dock-icon {
-            transform: scale(0.9);
-        }
+        /* 마우스로 클릭(터치)했을 때 실제 폰처럼 살짝 작아지는 모션 효과 */
         .dock-item:active .dock-icon {
             transform: scale(0.9);
         }
