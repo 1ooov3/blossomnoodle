@@ -262,17 +262,20 @@
     }
     .lock-layer-active.fade-out { opacity: 0; pointer-events: none; }
 
-    /* 비밀번호(PIN) 입력 레이어 */
+    /* 비밀번호(PIN) 입력 레이어 - 화면 중앙 배치 시스템 적용 */
     .pin-layer {
         position: absolute; top: 40px; left: 0; width: 100%; height: calc(100% - 40px);
         background-color: #000000; display: flex; flex-direction: column;
-        justify-content: space-between; align-items: center; padding-bottom: 40px;
+        justify-content: center; align-items: center; padding-bottom: 20px;
         opacity: 0; pointer-events: none; transform: translateY(30px);
         transition: opacity 0.25s ease, transform 0.3s ease; z-index: 20;
+        gap: 30px; /* 문구와 키패드 간의 거리를 가깝게 좁히는 핵심 축 */
     }
     .pin-layer.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
-    .p-header { text-align: center; margin-top: 60px; }
-    .p-title { font-size: 19px; font-weight: 400; margin-bottom: 24px; color: #ffffff; }
+    
+    /* 핀번호 문구 영역 위치 세정밀 조정 */
+    .p-header { text-align: center; margin-top: 0; }
+    .p-title { font-size: 19px; font-weight: 400; margin-bottom: 20px; color: #ffffff; }
     .p-dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 16px; }
     .p-dot { width: 12px; height: 12px; border: 2px solid #ffffff; border-radius: 50%; transition: background 0.1s; }
     .p-dot.filled { background-color: #ffffff; }
@@ -320,7 +323,7 @@
     const notiCard = document.querySelector('.notification-card');
     const actionBtmBar = document.querySelector('.bottom-action-bar');
 
-    // 누락되었던 시작 잠금화면 방(컨테이너)을 생성하고 원본 구조를 안전하게 이식
+    // 잠금화면 컨테이너 생성 후 안전 이식
     const lockWrapper = document.createElement('div');
     lockWrapper.id = 'dynamic-lock-screen';
     lockWrapper.className = 'lock-layer-active';
@@ -331,7 +334,7 @@
         lockWrapper.appendChild(bottomPart);
     }
 
-    // 신규 화면 구조(PIN, 홈, 카톡) 정의 후 메인 프레임에 주입
+    // 신규 화면 구조 정의 후 주입
     const extHTML = `
         <div id="dynamic-pin-screen" class="pin-layer">
             <div class="p-header">
@@ -371,9 +374,9 @@
     let inputPassword = "";
     let flowDestination = "home";
 
-    // 어디를 클릭해도 비밀번호창으로 이동 (실제 마우스 클릭 대응)
+    // 어디를 클릭해도 비밀번호창으로 이동
     lockWrapper.addEventListener('click', (e) => {
-        if(actionBtmBar && actionBtmBar.contains(e.target)) return; // 하단 단축아이콘 터치 제외
+        if(actionBtmBar && actionBtmBar.contains(e.target)) return;
         flowDestination = "home";
         openPinView();
     });
@@ -381,7 +384,7 @@
     // 카톡 알림 미리보기 클릭 시 
     if(notiCard) {
         notiCard.addEventListener('click', (e) => {
-            e.stopPropagation(); // 일반 클릭 이벤트 전이 차단
+            e.stopPropagation();
             flowDestination = "chat";
             openPinView();
         });
