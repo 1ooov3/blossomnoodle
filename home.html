@@ -135,55 +135,42 @@
         .music-warn-text.show {
             opacity: 1;
         } 
- <!-- 1. 음악 재생바 위젯 (가수명 - 노래제목 한 줄 정렬 완성본) -->
-            <div class="music-widget" style="flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 18px;">
-                <!-- 노래탭 조금 위에 뜨는 동적 안내 문구 판 -->
-                <div id="music-warn" class="music-warn-text">재생할 수 있는 곡이 없습니다.</div>
-                
-                <!-- 상단 영역: [앨범커버] 가수명 - 노래제목 -->
-                <div class="music-info-side" style="display: flex; align-items: center; gap: 12px; width: 100%;">
-                    <div id="album-art-btn" class="music-album-art" onclick="playCurrentLink()" style="cursor: pointer; width: 44px; height: 44px; border-radius: 12px; overflow: hidden; flex-shrink: 0;">
-                        <img id="album-img" src="firstlove.jpg" alt="앨범 표지" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='firstlove.jpeg'">
-                    </div>
-                    
-                    <!-- 손그림 요청 반영: 가수명과 노래제목을 한 줄로 정렬 -->
-                    <div class="music-meta" style="display: flex; flex-direction: row; align-items: center; gap: 6px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">
-                        <!-- 가수명 (두껍게 강조) -->
-                        <span id="music-singer" style="font-weight: 600; color: #ffffff;">에피톤 프로젝트</span>
-                        <!-- 구분 대시 기호 -->
-                        <span style="color: #e0e0e0; font-weight: 400;">-</span>
-                        <!-- 노래제목 (얇고 차분하게 처리) -->
-                        <span id="music-name" style="font-weight: 400; color: #e0e0e0;">첫사랑</span>
-                    </div>
-                </div>
-                
-                <!-- 하단 영역: 재생 컨트롤 버튼 구역 (중앙 우측 정렬) -->
-                <div class="music-controls" style="display: flex; align-items: center; gap: 20px; width: 100%; justify-content: flex-end; padding-right: 4px; margin-top: 4px;">
-                    <button class="control-btn" id="prev-track" aria-label="이전곡">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-                    </button>
-                    <button class="control-btn" aria-label="재생/일시정지">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                    </button>
-                    <button class="control-btn" id="next-track" aria-label="다음곡">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M16 6h2v12h-2zm-10.5 0v12l8.5-6z"/></svg>
-                    </button>
-                </div>
-            </div>
-                
-                <!-- 오른쪽 재생 컨트롤 버튼 구역 고정 -->
-                <div class="music-controls" style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
-                    <button class="control-btn" id="prev-track" aria-label="이전곡">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-                    </button>
-                    <button class="control-btn" aria-label="재생/일시정지">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                    </button>
-                    <button class="control-btn" id="next-track" aria-label="다음곡">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M16 6h2v12h-2zm-10.5 0v12l8.5-6z"/></svg>
-                    </button>
-                </div>
-            </div>
+<!-- 1. 음악 재생바 위젯 (손그림 가로형 - 가수명, 노래제목 크기/굵기 동일 버전) -->
+<div class="music-widget" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; padding: 14px 18px !important; gap: 12px !important; height: 72px !important;">
+    <!-- 노래탭 조금 위에 뜨는 동적 안내 문구 판 -->
+    <div id="music-warn" class="music-warn-text">재생할 수 있는 곡이 없습니다.</div>
+    
+    <!-- 왼쪽 정렬 구역: [앨범커버]  가수명 - 노래제목 -->
+    <div style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 12px !important; flex: 1 !important; min-width: 0 !important;">
+        <!-- 앨범커버 -->
+        <div id="album-art-btn" class="music-album-art" onclick="playCurrentLink()" style="cursor: pointer; width: 44px !important; height: 44px !important; border-radius: 12px !important; overflow: hidden !important; flex-shrink: 0 !important; display: flex !important; justify-content: center !important; align-items: center !important;">
+            <img id="album-img" src="firstlove.jpg" alt="앨범 표지" style="width: 100% !important; height: 100% !important; object-fit: cover !important;" onerror="this.src='firstlove.jpeg'">
+        </div>
+        
+        <!-- 가수명 - 노래제목 레이아웃 (요청반영: 글자 크기와 굵기를 두껍고 시원하게 완전 동일 배치) -->
+        <div style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 6px !important; font-size: 14px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">
+            <!-- 가수명 -->
+            <span id="music-singer" style="font-weight: 600 !important; color: #ffffff !important; display: inline !important;">에피톤 프로젝트</span>
+            <!-- 중간 구분 대시 기호 -->
+            <span style="color: #ffffff !important; font-weight: 600 !important; display: inline !important;">-</span>
+            <!-- 노래제목 (가수명과 동일한 굵기 및 화이트 색상 동기화 세팅 완료) -->
+            <span id="music-name" style="font-weight: 600 !important; color: #ffffff !important; display: inline !important;">첫사랑</span>
+        </div>
+    </div>
+    
+    <!-- 오른쪽 정렬 구역: 재생 컨트롤 버튼들을 우측 끝 수평선에 고정 (중복 오류 원천 차단) -->
+    <div class="music-controls" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 14px !important; flex-shrink: 0 !important;">
+        <button class="control-btn" id="prev-track" aria-label="이전곡" style="background: none; border: none; cursor: pointer; display: flex; align-items: center;">
+            <svg width="16" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="control-btn" aria-label="재생/일시정지" style="background: none; border: none; cursor: pointer; display: flex; align-items: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="control-btn" id="next-track" aria-label="다음곡" style="background: none; border: none; cursor: pointer; display: flex; align-items: center;">
+            <svg width="16" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M16 6h2v12h-2zm-10.5 0v12l8.5-6z"/></svg>
+        </button>
+    </div>
+</div>
         .music-info-side {
             display: flex;         /* 요소들을 가로로 나열 */
             flex-direction: row;   /* 강제로 세로 정렬을 해제하고 가로 정렬로 고정 */
