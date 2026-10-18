@@ -135,20 +135,18 @@
         .music-warn-text.show {
             opacity: 1;
         } 
-     <!-- 1. 음악 재생바 위젯 (첫사랑 앨범아트 즉시 로딩 및 제목/가수 위치 최적화) -->
+       <!-- 1. 음악 재생바 위젯 (첫사랑 앨범아트 주소 보정 및 경고 레이어 통합본) -->
             <div class="music-widget">
-                <!-- 노래탭 조금 위에 뜨는 동적 안내 문구 판 -->
+                <!-- 노래탭 조금 위에 뜨는 동적 안내 문구 판 생성 -->
                 <div id="music-warn" class="music-warn-text">재생할 수 있는 곡이 없습니다.</div>
                 <div class="music-info-side">
                     <div id="album-art-btn" class="music-album-art" onclick="playCurrentLink()" style="cursor: pointer;">
-                        <!-- 홈화면 진입하자마자 깨짐 없이 즉시 사진을 찾을 수 있도록 복수 확장자 우회 패스 적용 -->
-                        <img id="album-img" src="firstlove.jpg" alt="앨범 표지" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='firstlove.jpeg';">
+                        <!-- 이미지 확장자 불일치 차단 처리를 완료한 앨범 표지 이미지 태그 -->
+                        <img id="album-img" src="firstlove.jpg" alt="앨범 표지" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='firstlove.jpeg'">
                     </div>
                     <div class="music-meta">
-                        <!-- 요청사항 반영: 윗줄에 상대적으로 크고 굵은 노래제목 배치 -->
-                        <span id="music-name" class="music-title" style="font-size: 14px; font-weight: 600;">첫사랑</span>
-                        <!-- 아랫줄에 상대적으로 작고 얇은 가수명 배치 -->
-                        <span id="music-singer" class="music-artist" style="font-size: 11px; color: #e0e0e0; font-weight: 400;">에피톤 프로젝트</span>
+                        <span id="music-singer" class="music-title">에피톤 프로젝트</span>
+                        <span id="music-name" class="music-artist">첫사랑</span>
                     </div>
                 </div>
                 <div class="music-controls">
@@ -477,56 +475,56 @@
             toast.classList.remove('show');
         }, 2000);
     }
-   // 3. [레이아웃 버그 해결] 정밀 곡 스위칭 및 상하 글자 배치 고정형 스마트 엔진
+  // 3. [기능 완벽 업그레이드] 정밀 곡 스위칭 및 경고 문구 표출 스마트 엔진
     const playList = [
         { singer: "에피톤 프로젝트", title: "첫사랑", cover: "firstlove.jpg", backupCover: "firstlove.jpeg", url: "https://youtu.be/IvudifrHicg?si=NyZThc2fRf4qrPiT" },
         { singer: "죠지", title: "하루종일", cover: "oneday.jpg", backupCover: "oneday.jpg", url: "https://youtu.be/jldSuUKTQec?si=3fZ-jQII_JpiYnI6" },
         { singer: "Kobota Toshinobu", title: "La La La Love Song", cover: "lalalalovesong.png", backupCover: "lalalalovesong.png", url: "https://youtu.be/nm5CvclKvHM?si=Q2UMlzGmf0xcub2i" }
     ];
-    let currentTrackIndex = 0; 
+    let currentTrackIndex = 0; // 0: 첫사랑, 1: 죠지, 2: 러브송
     let warnTimeout;
     function playCurrentLink() {
         window.open(playList[currentTrackIndex].url, '_blank');
     }
-    // 버튼을 눌러 트랙이 바뀔 때도 윗줄(노래제목), 아랫줄(가수명)의 구조적 뼈대를 그대로 유지하는 기능 함수
     function updateMusicWidgetUI() {
         const imgEl = document.getElementById('album-img');
         imgEl.src = playList[currentTrackIndex].cover;
-        imgEl.onerror = function() { this.onerror = null; this.src = playList[currentTrackIndex].backupCover; }; 
-        
-        // 윗줄 제목 칸과 아랫줄 가수 칸의 데이터를 정확히 타겟팅하여 덮어쓰기
-        document.getElementById('music-name').textContent = playList[currentTrackIndex].title;
+        imgEl.onerror = function() { this.src = playList[currentTrackIndex].backupCover; }; // jpeg/jpg 예외 자동 처리
         document.getElementById('music-singer').textContent = playList[currentTrackIndex].singer;
+        document.getElementById('music-name').textContent = playList[currentTrackIndex].title;
     }
+    // "재생할 수 있는 곡이 없습니다" 안내문구 띄우기 함수
     function showMusicWarning() {
         const warnText = document.getElementById('music-warn');
         clearTimeout(warnTimeout);
         warnText.classList.add('show');
-        warnTimeout = setTimeout(() => { warnText.classList.remove('show'); }, 1500);
+        warnTimeout = setTimeout(() => { warnText.classList.remove('show'); }, 1500); // 1.5초 후 증발
     }
-    // 이전 곡 버튼 제어
+    // [이전 곡 버튼 제어 알고리즘]
     document.getElementById('prev-track').addEventListener('click', (e) => {
         e.stopPropagation();
         if (currentTrackIndex === 0) {
-            currentTrackIndex = 1; 
+            currentTrackIndex = 1; // 첫사랑 상태일 때 누르면 ➔ 죠지 노래 재생
             updateMusicWidgetUI();
         } else if (currentTrackIndex === 1) {
-            showMusicWarning();   
+            showMusicWarning();   // 죠지 노래 상태일 때 한번 더 누르면 ➔ 경고 문구 작동
         } else if (currentTrackIndex === 2) {
-            currentTrackIndex = 0; 
+            currentTrackIndex = 0; // 러브송 상태일 때 누르면 ➔ 다시 첫사랑으로 롤백
             updateMusicWidgetUI();
         }
     });
-    // 다음 곡 버튼 제어
+    // [다음 곡 버튼 제어 알고리즘]
     document.getElementById('next-track').addEventListener('click', (e) => {
         e.stopPropagation();
         if (currentTrackIndex === 0) {
-            currentTrackIndex = 2; 
+            currentTrackIndex = 2; // 첫사랑 상태일 때 누르면 ➔ 라라라러브송 재생
             updateMusicWidgetUI();
         } else if (currentTrackIndex === 2) {
-            showMusicWarning();   
+            showMusicWarning();   // 러브송 상태일 때 한번 더 누르면 ➔ 경고 문구 작동
         } else if (currentTrackIndex === 1) {
-            currentTrackIndex = 0; 
+            currentTrackIndex = 0; // 죠지 노래 상태일 때 누르면 ➔ 다시 첫사랑으로 롤백
             updateMusicWidgetUI();
         }
     });
+</script>
+</html>
