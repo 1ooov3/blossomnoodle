@@ -55,7 +55,7 @@
             padding: 0 24px;
             font-size: 14px;
             font-weight: 500;
-            z-index: 10;
+            z-index: 30; /* 화면 전환 시에도 상단바 유지 */
         }
 
         .status-right {
@@ -92,14 +92,31 @@
             border-radius: 0 1px 1px 0;
         }
 
-        /* 중앙 시계 및 날짜 영역 */
+        /* 공통 화면 레이어 스타일 */
+        .screen-layer {
+            position: absolute;
+            top: 40px; /* 상태바 아래부터 시작 */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 40px);
+            display: flex;
+            flex-direction: column;
+            background-color: #000000;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+
+        /* 1. 잠금화면 메인 레이어 */
+        #lock-screen-layer {
+            z-index: 10;
+            cursor: pointer;
+        }
+
         .lock-screen-center {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding-top: 40px;
-            z-index: 10;
         }
 
         .time {
@@ -128,6 +145,7 @@
             align-items: center;
             gap: 12px;
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            z-index: 15;
         }
 
         .kakao-icon {
@@ -171,7 +189,6 @@
             flex-direction: column;
             align-items: center;
             gap: 20px;
-            z-index: 10;
         }
 
         .unlock-text {
@@ -217,66 +234,175 @@
             stroke-linecap: round;
             stroke-linejoin: round;
         }
-    </style>
-</head>
-<body>
 
-    <!-- 휴대폰 본체 프레임 -->
-    <div class="phone-frame">
-        
-        <!-- 상단 바 -->
-        <div class="status-bar">
-            <div class="status-left">오후 5:02</div>
-            <div class="status-right">
-                <span>81%</span>
-                <div class="battery-icon">
-                    <div class="battery-level"></div>
-                    <div class="battery-tip"></div>
-                </div>
-            </div>
-        </div>
+        /* 2. 비밀번호(PIN) 입력 레이어 */
+        #pin-screen-layer {
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(30px);
+            justify-content: space-between;
+            padding: 60px 40px 40px 40px;
+        }
 
-        <!-- 중앙 화면 영역 (시계, 날짜, 알림) -->
-        <div class="lock-screen-center">
-            <div class="time">5:02</div>
-            <div class="date">10월 6일 화요일</div>
-            
-            <!-- 카카오톡 알림 미리보기 창 -->
-            <div class="notification-card">
-                <img class="kakao-icon" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDAg2IYnAdytH10MKmi6wsnn-UPwxjORKPyCsJ1ONzpQ&s=10" alt="카카오톡">
-                <div class="notification-content">
-                    <div class="noti-header">
-                        <span class="sender-name">덩이❤</span>
-                        <span class="noti-time">지금</span>
-                    </div>
-                    <div class="noti-text">형 나 수업끝났어</div>
-                </div>
-            </div>
-        </div>
+        .pin-upper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
 
-        <!-- 하단 영역 (안내 문구, 양쪽 아이콘) -->
-        <div class="lock-screen-bottom">
-            <div class="unlock-text">화면을 탭하여 잠금해제</div>
-            
-            <div class="bottom-action-bar">
-                <!-- 왼쪽 전화 아이콘 (사진 참고) -->
-                <div class="action-button" aria-label="전화기">
-                    <svg class="icon-svg" viewBox="0 0 24 24">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                    </svg>
-                </div>
-                
-                <!-- 오른쪽 카메라 아이콘 (사진 참고) -->
-                <div class="action-button" aria-label="카메라">
-                    <svg class="icon-svg" viewBox="0 0 24 24">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                        <circle cx="12" cy="13" r="4"></circle>
-                    </svg>
-                </div>
-            </div>
-        </div>
+        .pin-msg {
+            font-size: 18px;
+            font-weight: 400;
+            color: #ffffff;
+            height: 24px;
+            text-align: center;
+        }
 
-    </div>
+        .pin-msg.error {
+            color: #ff4d4d;
+            animation: shake 0.3s ease-in-out;
+        }
 
-</body>
-</html>
+        /* PIN 도트 표시기 */
+        .pin-dots {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            transition: background-color 0.1s ease;
+        }
+
+        .dot.filled {
+            background-color: #ffffff;
+        }
+
+        /* 모바일 숫자 키패드 그리드 */
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px 30px;
+            width: 100%;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        .key {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 26px;
+            font-weight: 400;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 50%;
+            user-select: none;
+        }
+
+        .key:active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .key.sub-text {
+            font-size: 14px;
+            color: #aaaaaa;
+        }
+
+        /* 3. 스마트폰 홈 화면 레이어 */
+        #home-screen-layer {
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #121212;
+        }
+
+        .home-content {
+            text-align: center;
+        }
+
+        .home-icon-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            padding: 40px 24px;
+        }
+
+        .home-app {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #ffffff;
+        }
+
+        .app-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background-color: #2b2b2b;
+        }
+
+        /* 4. 카카오톡 대화방 레이어 */
+        #chat-screen-layer {
+            z-index: 5;
+            background-color: #abc1d1; /* 카카오톡 기본 대화방 배경색 */
+            color: #000000;
+        }
+
+        .chat-header {
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-bubble-received {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .chat-thumb {
+            width: 36px;
+            height: 36px;
+            border-radius: 14px;
+            object-fit: cover;
+        }
+
+        .chat-bubble-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .chat-name {
+            font-size: 12px;
+            color: #555555;
+        }
+
+        .chat-text-wrapper {
+            display: flex;
