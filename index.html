@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>휴대폰</title>
     <style>
-        /* [기본 스타일 구조] 단일 휴대폰 틀 유지 */
+        /* [스타일 초기화] 단일 프레임 유지 구조 */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -24,13 +24,13 @@
             color: #ffffff;
         }
 
-        /* 📱 유일한 휴대폰 본체 프레임 (절대 늘어나거나 새로 생기지 않음) */
+        /* 📱 유일한 갤럭시 스타일 스마트폰 프레임 (덮어써도 절대 옆에 새로 생기지 않음) */
         .phone-frame {
             width: 100%;
             max-width: 375px;
             height: 100vh;
             max-height: 812px;
-            background-color: #000000; /* 무늬 없는 검정 */
+            background-color: #000000; /* 아무 무늬 없는 검정 */
             position: relative;
             overflow: hidden;
             display: flex;
@@ -46,7 +46,7 @@
             }
         }
 
-        /* 상단 고정 상태바 */
+        /* 상단 고정 상태바 (오후 5시 2분, 배터리 81% 상시 고정) */
         .status-bar {
             height: 40px;
             display: flex;
@@ -58,7 +58,7 @@
             position: absolute;
             top: 0;
             width: 100%;
-            z-index: 100; /* 모든 화면보다 위에 고정 */
+            z-index: 100;
         }
 
         .status-right {
@@ -67,7 +67,7 @@
             gap: 6px;
         }
 
-        /* 🔄 휴대폰 내부 화면들 (기본적으로 숨겨져 있다가 .active만 노출) */
+        /* 🔄 내부 화면 템플릿 (.active 클래스로 유기적 스위칭) */
         .screen {
             position: absolute;
             top: 0;
@@ -76,15 +76,15 @@
             height: 100%;
             display: none;
             flex-direction: column;
-            padding-top: 40px; /* 상태바 공간 확보 */
-            padding-bottom: 25px; /* 하단 인디케이터 공간 확보 */
+            padding-top: 40px; /* 상단바 레이어 침범 방지 */
+            padding-bottom: 25px; /* 하단 홈인디케이터 구역 확보 */
         }
         
         .screen.active {
             display: flex;
         }
 
-        /* 1️⃣ [화면] 잠금화면 구역 */
+        /* 1️⃣ [화면] 맨 처음 잠금화면 구역 */
         #lock-screen {
             justify-content: space-between;
             align-items: center;
@@ -112,7 +112,7 @@
             opacity: 0.9;
         }
 
-        /* 카카오톡 알림 미리보기 창 */
+        /* 알림 미리보기 창 */
         .notification-card {
             width: 100%;
             background-color: rgba(255, 255, 255, 0.15);
@@ -127,6 +127,7 @@
             z-index: 20;
         }
 
+        /* 지정해주신 카카오톡 공식 이미지 적용 아이콘 */
         .kakaotalk-icon-img {
             width: 42px;
             height: 42px;
@@ -167,7 +168,7 @@
             text-overflow: ellipsis;
         }
 
-        /* 잠금화면 하단 (보내주신 사진 참고 스타일) */
+        /* 잠금화면 하단 (보내주신 참조 사진 완벽 싱크 구현) */
         .lock-bottom-area {
             width: 100%;
             display: flex;
@@ -178,15 +179,17 @@
 
         .bottom-prompt {
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.9);
             text-align: center;
             flex: 1;
+            letter-spacing: -0.3px;
         }
 
+        /* 왼쪽 전화기, 오른쪽 카메라 원형 숏컷 버튼 */
         .bottom-shortcut {
             width: 46px;
             height: 46px;
-            background-color: rgba(255, 255, 255, 0.15);
+            background-color: rgba(255, 255, 255, 0.18);
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -200,13 +203,13 @@
             height: 20px;
             fill: none;
             stroke: #ffffff;
-            stroke-width: 2;
+            stroke-width: 1.8;
         }
 
 
-        /* 2️⃣ [화면] PIN 번호 입력 화면 */
+        /* 2️⃣ [화면] 모바일 숫자 키패드 PIN 입력 화면 */
         #pin-screen {
-            background-color: rgba(0, 0, 0, 0.95);
+            background-color: rgba(0, 0, 0, 0.96);
             justify-content: center;
             align-items: center;
             z-index: 30;
@@ -216,8 +219,10 @@
             font-size: 18px;
             font-weight: 400;
             margin-bottom: 25px;
+            color: #ffffff;
         }
 
+        /* 암호 동그라미 컨테이너 */
         .pin-dots-container {
             display: flex;
             gap: 16px;
@@ -236,7 +241,7 @@
             background-color: #ffffff;
         }
 
-        /* 숫자 패드 그리드 */
+        /* 숫자 패드 그리드 배열 */
         .pin-pad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -268,18 +273,18 @@
         }
 
 
-        /* 3️⃣ [화면] 잠금해제 성공 시 홈 화면 */
+        /* 3️⃣ [화면] 잠금해제 성공 시 나타나는 빈 홈화면 */
         #home-screen {
-            background-color: #121212;
+            background-color: #000000; /* 아무 무늬 없는 검정 */
             justify-content: center;
             align-items: center;
             z-index: 50;
         }
 
 
-        /* 4️⃣ [화면] 알림 누르고 해제 시 나타날 카톡 대화방 */
+        /* 4️⃣ [화면] 알림 터치 성공 시 바로 진입할 카톡 대화방 */
         #chat-screen {
-            background-color: #abc1d1; /* 카톡 기본 배경색 */
+            background-color: #abc1d1; /* 카카오톡 시그니처 배경색 */
             color: #000000;
             z-index: 60;
         }
@@ -316,7 +321,7 @@
             margin-top: 5px;
         }
 
-        /* 하단 가상 홈 물리 바 */
+        /* 하단 가상 네비게이션 소프트 바 */
         .bottom-bar {
             height: 25px;
             display: flex;
@@ -339,10 +344,10 @@
 </head>
 <body>
 
-    <!-- 📱 단 하나의 휴대폰 프레임틀 고정 -->
+    <!-- 📱 단 하나의 휴대폰 고정 프레임 구조 -->
     <div class="phone-frame">
         
-        <!-- 상단바 고정 (오후 5시 2분, 배터리 81%) -->
+        <!-- 상단 고정 상태바 영역 -->
         <div class="status-bar">
             <span class="status-time">5:02</span>
             <div class="status-right">
@@ -352,25 +357,20 @@
             </div>
         </div>
 
-        <!-- 1️⃣ [화면 섹션] 잠금 화면 (초기 활성화) -->
+        <!-- 1️⃣ [화면] 잠금 화면 (마우스 클릭 시 PIN 번호 입력창 전환) -->
         <div id="lock-screen" class="screen active" onclick="openPinPad('home')">
+            
             <div class="clock-area">
                 <div class="clock-time">5:02</div>
                 <div class="clock-date">10월 6일 화요일</div>
             </div>
 
-            <!-- 카카오톡 알림 레이아웃 -->
+            <!-- 카카오톡 알림 미리보기 레이아웃 -->
             <div class="notification-card" id="kakaoNotification">
-                <img class="kakaotalk-icon-img" src="https://gstatic.com" alt="KakaoTalk">
+                <img class="kakaotalk-icon-img" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDAg2IYnAdytH10MKmi6wsnn-UPwxjORKPyCsJ1ONzpQ&s=10" alt="KakaoTalk">
                 <div class="notification-content">
                     <div class="notification-header">
                         <span class="sender-name">덩이❤</span>
                         <span class="app-name">지금</span>
                     </div>
                     <div class="message-text">형 나 수업끝났어</div>
-                </div>
-            </div>
-
-            <!-- 하단 구조 (전화기 - 문구 - 카메라) -->
-            <div class="lock-bottom-area">
-                <div class="bottom-shortcut">
