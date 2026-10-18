@@ -24,13 +24,13 @@
             color: #ffffff;
         }
 
-        /* 📱 단 하나의 갤럭시 스타일 스마트폰 프레임 */
+        /* 📱 갤럭시 스타일 스마트폰 본체 프레임 */
         .phone-frame {
             width: 100%;
             max-width: 375px;
             height: 100vh;
             max-height: 812px;
-            background-color: #000000; /* 아무 무늬 없는 검정 */
+            background-color: #000000; /* 아무 무늬 없는 검정 배경 */
             position: relative;
             overflow: hidden;
             display: flex;
@@ -46,7 +46,7 @@
             }
         }
 
-        /* 상단 고정 상태바 (오후 5시 2분, 배터리 81% 상시 고정) */
+        /* 상단 고정 상태바 (오후 5시 2분, 배터리 81%) */
         .status-bar {
             height: 40px;
             display: flex;
@@ -76,33 +76,39 @@
             height: 100%;
             display: none;
             flex-direction: column;
-            padding-top: 40px; /* 상단바 영역 */
-            padding-bottom: 25px; /* 하단 바 영역 */
+            padding-top: 40px;
+            padding-bottom: 25px;
         }
         
         .screen.active {
             display: flex;
         }
 
-        /* 1️⃣ [화면] 정확한 초기 레이아웃 복원 잠금화면 */
+        /* 1️⃣ 잠금화면 레이아웃 (정확한 초기 정렬 복원) */
         #lock-screen {
             height: 100%;
             padding-left: 24px;
             padding-right: 24px;
-            cursor: pointer;
+            position: relative;
             z-index: 10;
-            display: none; /* 기본 숨김, active 시 flex */
-        }
-        #lock-screen.active {
-            display: flex;
-            flex-direction: column;
         }
 
-        /* 날짜 및 시간 영역 */
+        /* 🔴 [중요] 클릭 씹힘 방지용 전체 화면 투명 클릭 감지 레이어 */
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 15; /* 알림창보다 아래에 두어 바탕화면 클릭을 담당 */
+        }
+
         .clock-area {
             text-align: center;
             margin-top: 30px;
-            margin-bottom: 20px; /* 카톡 알림이 바로 아래에 붙도록 여백 조절 */
+            margin-bottom: 20px; /* 시간 바로 밑에 알림창 배치 */
+            position: relative;
+            z-index: 10;
         }
 
         .clock-time {
@@ -118,7 +124,7 @@
             opacity: 0.9;
         }
 
-        /* 카카오톡 알림 미리보기 창 (시간/날짜 바로 아래 배치) */
+        /* 카카오톡 알림 미리보기 창 */
         .notification-card {
             width: 100%;
             background-color: rgba(255, 255, 255, 0.15);
@@ -130,10 +136,11 @@
             align-items: center;
             gap: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            z-index: 20; /* 클릭 확실하게 먹히도록 높임 */
+            position: relative;
+            z-index: 25; /* 바탕화면 레이어보다 위로 올려서 단독 클릭 확보 */
+            cursor: pointer;
         }
 
-        /* 카카오톡 공식 이미지 적용 아이콘 */
         .kakaotalk-icon-img {
             width: 42px;
             height: 42px;
@@ -174,14 +181,16 @@
             text-overflow: ellipsis;
         }
 
-        /* 잠금화면 하단 정렬 구역 (보내주신 사진 완벽 구현) */
+        /* 하단 바 (전화기 - 문구 - 카메라) */
         .lock-bottom-container {
-            margin-top: auto; /* 중간 여백을 다 밀어내고 맨 아래로 강제 고정 */
+            margin-top: auto;
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding-bottom: 10px;
+            position: relative;
+            z-index: 10;
         }
 
         .bottom-prompt {
@@ -192,7 +201,6 @@
             letter-spacing: -0.3px;
         }
 
-        /* 왼쪽 전화기, 오른쪽 카메라 원형 아이콘 */
         .bottom-shortcut {
             width: 46px;
             height: 46px;
@@ -214,12 +222,12 @@
         }
 
 
-        /* 2️⃣ [화면] PIN 번호 입력창 화면 */
+        /* 2️⃣ 모바일 숫자 키패드 PIN 입력 화면 */
         #pin-screen {
             background-color: rgba(0, 0, 0, 0.96);
             justify-content: center;
             align-items: center;
-            z-index: 30;
+            z-index: 50;
         }
 
         .pin-prompt {
@@ -277,20 +285,20 @@
         }
 
 
-        /* 3️⃣ [화면] 성공 시 나타나는 검정 홈화면 */
+        /* 3️⃣ 비밀번호 성공 시 검정 홈화면 */
         #home-screen {
             background-color: #000000;
             justify-content: center;
             align-items: center;
-            z-index: 50;
+            z-index: 60;
         }
 
 
-        /* 4️⃣ [화면] 카톡방 화면 */
+        /* 4️⃣ 알림 누르고 해제 성공 시 카톡 대화방 */
         #chat-screen {
             background-color: #abc1d1;
             color: #000000;
-            z-index: 60;
+            z-index: 70;
         }
 
         .chat-header {
@@ -325,7 +333,7 @@
             margin-top: 5px;
         }
 
-        /* 하단 소프트 바 물리 바 */
+        /* 하단 가상 네비게이션 소프트 바 */
         .bottom-bar {
             height: 25px;
             display: flex;
@@ -360,18 +368,18 @@
             </div>
         </div>
 
-        <!-- 1️⃣ [화면] 아까의 정확한 정렬 구조 복원 잠금화면 (전체 클릭 인식 보정) -->
-        <div id="lock-screen" class="screen active" onclick="openPinPad('home')">
+        <!-- 1️⃣ [화면] 잠금 화면 섹션 -->
+        <div id="lock-screen" class="screen active">
             
+            <!-- 🔴 확실한 전환을 보장하는 바탕화면 투명 클릭 레이어 -->
+            <div class="click-overlay" onclick="openPinPad('home')"></div>
+
             <!-- 시간 및 날짜 -->
             <div class="clock-area">
                 <div class="clock-time">5:02</div>
                 <div class="clock-date">10월 6일 화요일</div>
             </div>
 
-            <!-- 카카오톡 알림 미리보기 (정확하게 날짜 바로 밑에 위치) -->
-            <div class="notification-card" id="kakaoNotification">
+            <!-- 카카오톡 알림 미리보기 (시간/날짜 직하단 고정) -->
+            <div class="notification-card" onclick="openPinPad('chat')">
                 <img class="kakaotalk-icon-img" src="https://gstatic.com" alt="KakaoTalk">
-                <div class="notification-content">
-                    <div class="notification-header">
-                        <span class="sender-name">덩이❤</span>
