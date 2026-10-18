@@ -263,13 +263,8 @@
             <div class="music-widget">
                 <div class="music-info-side">
                     <!-- 앨범 표지(firstlove.jpeg) 영역을 클릭하면 지정된 유튜브 링크가 새 창으로 열리도록 스크립트 연결 -->
-                    <!-- ID 속성과 동적 링크 이벤트 처리를 위해 함수를 세팅합니다 -->
-                    <div id="album-art-btn" class="music-album-art" onclick="playCurrentLink()" style="cursor: pointer; overflow: hidden; display: flex; justify-content: center; align-items: center;">
-                        <img id="album-img" src="firstlove.jpeg" alt="앨범 표지" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    <div class="music-meta">
-                        <span id="music-singer" class="music-title">에피톤 프로젝트</span>
-                        <span id="music-name" class="music-artist">첫사랑</span>
+                    <div class="music-album-art" onclick="window.open('https://youtu.be/IvudifrHicg?si=NyZThc2fRf4qrPiT', '_blank')" style="cursor: pointer; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+                        <img src="firstlove.jpg" alt="첫사랑 앨범 표지" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="music-meta">
                         <!-- 기존 가수명과 노래제목 데이터를 요청하신 명칭으로 확실하게 스위칭 교체 -->
@@ -436,7 +431,7 @@
             toast.classList.remove('show');
         }, 2000);
     }
-// 3. [기능 추가] 음악 위젯 트랙 전환 및 동적 플레이어 모션 엔진
+ // 3. [기능 추가] 음악 위젯 트랙 전환 및 동적 플레이어 모션 엔진
     // 총 3개의 재생 목록 배열 생성 (0: 에피톤 프로젝트, 1: 죠지, 2: Kobota Toshinobu)
     const playList = [
         {
