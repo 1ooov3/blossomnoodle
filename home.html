@@ -221,15 +221,18 @@
             align-items: center;
             cursor: pointer;
         }
+     /* 하단 고정 독 아이콘 전용 최적화 디자인 스타일 */
         .dock-icon {
-    width: 54px;
-    height: 54px;
-    border-radius: 16px;       /* 다른 앱들과 똑같이 모서리를 둥글게 깎음 */
-    object-fit: contain;       /* 원본 사진의 비율을 훼손하지 않고 틀 안에 맞춤 */
-    background-color: #ffffff; /* 길쭉한 여백이 생기더라도 흰색 정사각형 패널처럼 보이게 채움 */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: transform 0.15s;
-}
+            width: 56px;        /* 상단 어플 아이콘들과 완벽히 일치하는 크기 고정 */
+            height: 56px;       /* 상단 어플 아이콘들과 완벽히 일치하는 크기 고정 */
+            border-radius: 16px; /* 모서리를 부드러운 라운드 정사각형으로 예쁘게 깎음 */
+            object-fit: cover;   /* 직접 올린 사진 이미지 비율을 깨짐 없이 가득 채움 */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.15s;
+        }
+        .dock-item:active .dock-icon {
+            transform: scale(0.9);
+        }
         .dock-item:active .dock-icon {
             transform: scale(0.9);
         }
