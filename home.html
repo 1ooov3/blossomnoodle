@@ -548,61 +548,88 @@
     window.addEventListener('DOMContentLoaded', () => {
         updateMusicWidgetUI();
     });
-// ==========================================================
-// 기존 로직 변형 방지를 위한 독립형 음악 알림 추가 기능 모듈
-// ==========================================================
+<!-- ==========================================================
+     기존 로직 변형을 100% 방어하는 독립형 음악 토스트 알림 모듈
+     ========================================================== -->
+<script>
 (function() {
-    // 1. 이전곡 버튼에 독립적인 알림 트리거 추가 (기존 클릭 이벤트와 별개로 동작)
+    // 1. 스크린샷과 똑같은 디자인의 검은색 독립형 토스트 알림창을 HTML에 동적 주입
+    const musicToast = document.createElement('div');
+    musicToast.id = 'independent-music-toast';
+    musicToast.textContent = '재생할 수 있는 곡이 없습니다.';
+    
+    // 갤럭시 스타일 토스트 디자인 및 애니메이션 CSS 정의
+    const style = document.createElement('style');
+    style.textContent = `
+        #independent-music-toast {
+            position: absolute;
+            bottom: 120px; 
+            left: 50%;
+            transform: translate(-50%, 30px);
+            background-color: rgba(26, 26, 26, 0.9);
+            color: #ffffff;
+            padding: 11px 24px;
+            border-radius: 24px;
+            font-size: 13.5px;
+            font-weight: 400;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 0.5px solid rgba(255,255,255,0.05);
+        }
+        #independent-music-toast.active-show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+    `;
+    
+    // 스마트폰 프레임(.phone-frame) 내부 혹은 body에 안전하게 결합
+    document.body.appendChild(style);
+    const phoneFrame = document.querySelector('.phone-frame');
+    if (phoneFrame) {
+        phoneFrame.appendChild(musicToast);
+    } else {
+        document.body.appendChild(musicToast);
+    }
+
+    let toastTimer;
+
+    // 토스트 알림을 띄우고 부드럽게 사라지게 하는 독립 제어 함수
+    function triggerMusicToastAnimation() {
+        clearTimeout(toastTimer);
+        musicToast.classList.add('active-show');
+        
+        // 1.8초 동안 노출된 후 부드럽게 페이드아웃
+        toastTimer = setTimeout(function() {
+            musicToast.classList.remove('active-show');
+        }, 1800);
+    }
+
+    // 2. 이전곡 버튼 감시 (기존 리스너를 방해하지 않는 상위 레이어 훅)
     const prevBtn = document.getElementById('prev-track');
     if (prevBtn) {
-        prevBtn.addEventListener('mousedown', function() {
-            // 현재 활성화된 트랙이 죠지(index 1)인 경우에만 독립적으로 알림 작동
+        const handlePrev = function() {
             if (typeof currentTrackIndex !== 'undefined' && currentTrackIndex === 1) {
-                triggerIndependentMusicWarn();
+                triggerMusicToastAnimation();
             }
-        });
-        // 모바일 터치 환경 대응
-        prevBtn.addEventListener('touchstart', function() {
-            if (typeof currentTrackIndex !== 'undefined' && currentTrackIndex === 1) {
-                triggerIndependentMusicWarn();
-            }
-        });
+        };
+        prevBtn.addEventListener('mousedown', handlePrev);
+        prevBtn.addEventListener('touchstart', handlePrev);
     }
 
-    // 2. 다음곡 버튼에 독립적인 알림 트리거 추가
+    // 3. 다음곡 버튼 감시
     const nextBtn = document.getElementById('next-track');
     if (nextBtn) {
-        nextBtn.addEventListener('mousedown', function() {
-            // 현재 활성화된 트랙이 라라라러브송(index 2)인 경우에만 독립적으로 알림 작동
+        const handleNext = function() {
             if (typeof currentTrackIndex !== 'undefined' && currentTrackIndex === 2) {
-                triggerIndependentMusicWarn();
+                triggerMusicToastAnimation();
             }
-        });
-        // 모바일 터치 환경 대응
-        nextBtn.addEventListener('touchstart', function() {
-            if (typeof currentTrackIndex !== 'undefined' && currentTrackIndex === 2) {
-                triggerIndependentMusicWarn();
-            }
-        });
-    }
-
-    // 3. 노래 탭 바로 위에 알림을 띄우고 지우는 독립형 타이머 제어 함수
-    let independentWarnTimeout;
-    function triggerIndependentMusicWarn() {
-        const warnElement = document.getElementById('music-warn');
-        if (warnElement) {
-            // 기존 타이머를 리셋하여 연속 클릭 시에도 부드럽게 유지
-            clearTimeout(independentWarnTimeout);
-            
-            // "재생할 수 있는 곡이 없습니다" 텍스트 보장 및 노출
-            warnElement.textContent = "재생할 수 있는 곡이 없습니다.";
-            warnElement.classList.add('show');
-            
-            // 1.5초(1500ms) 후에 노래 탭 위에서 부드럽게 사라지도록 설정
-            independentWarnTimeout = setTimeout(function() {
-                warnElement.classList.remove('show');
-            }, 1500);
-        }
+        };
+        nextBtn.addEventListener('mousedown', handleNext);
+        nextBtn.addEventListener('touchstart', handleNext);
     }
 })();
 </script>
