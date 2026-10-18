@@ -519,35 +519,31 @@
         warnText.classList.add('show');
         warnTimeout = setTimeout(() => { warnText.classList.remove('show'); }, 1500);
     }
-    // [이전 곡 버튼 완벽 알고리즘]: 라라라러브송(2) -> 첫사랑(0) -> 죠지(1) -> 경고문구
-    document.getElementById('prev-track').addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (currentTrackIndex === 0) {
-            currentTrackIndex = 1; // 첫사랑일 때 누르면 ➔ 죠지 노래 재생
-            updateMusicWidgetUI();
-        } else if (currentTrackIndex === 1) {
-            showMusicWarning();   // 죠지 상태일 때 한 번 더 누르면 ➔ 경고 작동
-        } else if (currentTrackIndex === 2) {
-            currentTrackIndex = 0; // 러브송 상태일 때 누르면 ➔ 다시 첫사랑으로 복귀
-            updateMusicWidgetUI();
-        }
-    });
-    // [다음 곡 버튼 완벽 알고리즘 수리]: 죠지(1) -> 첫사랑(0) -> 라라라러브송(2) -> 경고문구
-    document.getElementById('next-track').addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (currentTrackIndex === 0) {
-            currentTrackIndex = 2; // 첫사랑일 때 누르면 ➔ 라라라러브송 재생
-            updateMusicWidgetUI();
-        } else if (currentTrackIndex === 2) {
-            showMusicWarning();   // 러브송 상태일 때 한 번 더 누르면 ➔ 경고 작동
-        } else if (currentTrackIndex === 1) {
-            currentTrackIndex = 0; // 죠지 상태일 때 누르면 ➔ 조건문 충돌 우회하여 무조건 첫사랑(0)으로 복귀!
-            updateMusicWidgetUI();
-        }
-    });
-    window.addEventListener('DOMContentLoaded', () => {
+  // [이전 곡 버튼 알고리즘]: 죠지(1) 상태에서 누르면 경고 팝업 작동
+document.getElementById('prev-track').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentTrackIndex === 0) {
+        currentTrackIndex = 1; // 첫사랑일 때 누르면 ➔ 죠지 노래 재생
         updateMusicWidgetUI();
-    });
-
+    } else if (currentTrackIndex === 1) {
+        showMusicWarning();   // 죠지 상태일 때 누르면 ➔ "재생할 수 있는 곡이 없습니다." 경고 작동!
+    } else if (currentTrackIndex === 2) {
+        currentTrackIndex = 0; // 러브송 상태일 때 누르면 ➔ 다시 첫사랑으로 복귀
+        updateMusicWidgetUI();
+    }
+});
+// [다음 곡 버튼 알고리즘]: 라라라러브송(2) 상태에서 누르면 경고 팝업 작동
+document.getElementById('next-track').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentTrackIndex === 0) {
+        currentTrackIndex = 2; // 첫사랑일 때 누르면 ➔ 라라라러브송 재생
+        updateMusicWidgetUI();
+    } else if (currentTrackIndex === 2) {
+        showMusicWarning();   // 러브송 상태일 때 누르면 ➔ "재생할 수 있는 곡이 없습니다." 경고 작동!
+    } else if (currentTrackIndex === 1) {
+        currentTrackIndex = 0; // 죠지 상태일 때 누르면 ➔ 무조건 첫사랑(0)으로 복귀
+        updateMusicWidgetUI();
+    }
+});
 </script>
 </html>
