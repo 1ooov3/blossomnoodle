@@ -21,31 +21,32 @@
             overflow: hidden;
         }
         /* [모바일 최적화 고정] dvh 단위를 사용하여 기기 하단 툴바 잘림 현상을 완벽 방어 */
-        .phone-frame {
-            width: 100%;
-            max-width: 412px;
-            height: 100dvh;
-            max-height: 820px; /* 컴퓨터 모니터 인터페이스 최적 높이 */
-            background-color: #000000;
-            background-image: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('https://unsplash.com'); /* 참고사진 스타일의 하늘 분위기 연출 배경 */
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            border-radius: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 12px solid #2d2d2d;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        @media (max-width: 450px) {
-            .phone-frame {
-                border: none;
-                border-radius: 0;
-                height: 100dvh;
-                max-height: 100dvh;
-            }
-        }
+           /* 갤럭시 스타일 스마트폰 프레임 (반응형 외곽 틀) */
+      .phone-frame {
+    width: 100%;
+    max-width: 412px;
+    /* dvh(Dynamic Viewport Height)를 사용하여 모바일 툴바를 제외한 실제 화면 높이에 100% 맞춥니다 */
+    height: 100dvh; 
+    /* 컴퓨터 화면에서는 너무 길어지지 않도록 화면 높이의 85% 수준으로 자동 제한합니다 */
+    max-height: 85vh; 
+    background-color: #000000;
+    position: relative;
+    border-radius: 40px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 12px solid #2d2d2d;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}/* 모바일 기기(화면 폭 450px 이하)로 접속했을 때만 작동하는 특수 규칙 */
+@media (max-width: 450px) {
+    .phone-frame {
+        border: none;
+        border-radius: 0;
+        height: 100dvh; /* 모바일 브라우저 주소창 변동에 맞춰 실시간으로 늘고 줄어듦 */
+        max-height: 100dvh; /* 아래쪽이 절대 잘리지 않도록 꽉 채움 */
+    }
+}
+
         /* 상단 상태 바 (잠금화면과 데이터 통일) */
         .status-bar {
             height: 40px;
