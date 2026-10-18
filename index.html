@@ -140,6 +140,8 @@
         .kakao-noti:hover {
             background: rgba(255, 255, 255, 0.25);
         }
+        
+        /* 💬 카카오톡 말풍선 그림 아이콘 추가 */
         .kakao-icon-wrapper {
             width: 38px;
             height: 38px;
@@ -148,10 +150,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
-            color: #3a1d1d;
-            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
+        /* SVG 그래픽을 활용하여 노란 사각형 안에 검은 말풍선 그림 구현 */
+        .kakao-svg {
+            width: 20px;
+            height: 20px;
+            fill: #3a1d1d;
+        }
+        
         .noti-info {
             flex: 1;
         }
@@ -175,16 +182,22 @@
             align-items: center;
             padding: 0 28px;
         }
+        /* 사진 속 반투명하고 둥근 투명 앱 아이콘 버튼 구현 */
         .footer-app-btn {
             width: 46px;
             height: 46px;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+        }
+        .footer-app-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #ffffff;
         }
         .guide-text {
             font-size: 13px;
@@ -310,12 +323,12 @@
         }
     </style>
 </head>
-<body onclick="handleGlobalClick(event)">
+<body>
 
     <div class="phone-frame">
         <div class="punch-hole"></div>
         
-        <!-- 최상단 상태 인디케이터 바 -->
+        <!-- 최상단 상태 인디케이터 바 (오후 5:02 고정 및 배터리 81% 세팅) -->
         <div class="status-bar">
             <span>5:02</span>
             <div class="r">
@@ -326,16 +339,7 @@
             </div>
         </div>
 
-        <!-- [화면 1] 잠금화면 구역 -->
-        <div class="screen active" id="lock-screen">
+        <!-- [화면 1] 잠금화면 구역 (전체 구역 탭 이벤트 장착) -->
+        <div class="screen active" id="lock-screen" onclick="handleBackgroundClick(event)">
             <div class="clock-widget">
                 <div class="time-text">5:02</div>
-                <div class="date-text">10월 6일 화요일</div>
-            </div>
-
-            <div class="noti-box">
-                <!-- 카톡 알림 클릭 시 대화방 진입 플래그 장착 -->
-                <div class="kakao-noti" id="kakao-target" onclick="triggerUnlockPath('chat', event)">
-                    <div class="kakao-icon-wrapper">톡</div>
-                    <div class="noti-info">
-                        <div class="noti-sender">덩이❤</div>
