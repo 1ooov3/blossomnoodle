@@ -548,67 +548,6 @@
     window.addEventListener('DOMContentLoaded', () => {
         updateMusicWidgetUI();
     });
-<!-- ==========================================================
-     기존 기능 손상 없는 100% 독립형 음악 토스트 알림 확장 모듈
-     ========================================================== -->
-<script>
-(function() {
-    // 1. 기존 '지원하지 않는 기능입니다' 컴포넌트와 동일한 스펙의 새 알림창을 생성
-    const musicToast = document.createElement('div');
-    musicToast.id = 'music-unplayable-toast';
-    musicToast.className = 'toast-alert'; // 기존 CSS 효과(.toast-alert / .toast-alert.show) 그대로 계승
-    musicToast.textContent = '재생할 수 있는 곡이 없습니다.';
-    
-    // 2. 위치를 하단 독 위가 아닌 '노래 탭 조금 위'로 덮어쓰기 하는 독립 스타일 부여
-    musicToast.style.bottom = 'auto'; // 하단 기준 해제
-    musicToast.style.top = '165px';   // 스마트폰 상단 상태바 아래, 노래 탭 바로 위에 정확히 위치 고정
-    musicToast.style.zIndex = '999';  // 다른 앱 아이콘보다 무조건 위에 뜨도록 보장
-    
-    // 스마트폰 프레임(.phone-frame) 내부에 안전하게 삽입
-    const phoneFrame = document.querySelector('.phone-frame');
-    if (phoneFrame) {
-        phoneFrame.appendChild(musicToast);
-    } else {
-        document.body.appendChild(musicToast);
-    }
 
-    let musicToastTimer;
-
-    // 알림창 제어 핵심 모션 함수
-    function triggerMusicToast() {
-        clearTimeout(musicToastTimer);
-        musicToast.classList.add('show'); // 위로 슥 올라오며 투명도 1이 되는 기존 이펙트 작동
-        
-        // 1.5초 동안 노출 후 부드럽게 퇴장
-        musicToastTimer = setTimeout(function() {
-            musicToast.classList.remove('show');
-        }, 1500);
-    }
-
-    // 3. 기존 이벤트 리스너의 간섭 없이 독립적으로 동작 조건 감시
-    // [이전곡 버튼]: 현재 곡이 죠지(Index 1)일 때 실행
-    const prevBtn = document.getElementById('prev-track');
-    if (prevBtn) {
-        const checkPrev = function() {
-            if (typeof currentTrackIndex !== 'undefined' && currentTrackIndex === 1) {
-                triggerMusicToast();
-            }
-        };
-        prevBtn.addEventListener('mousedown', checkPrev);
-        prevBtn.addEventListener('touchstart', checkPrev);
-    }
-
-    // [다음곡 버튼]: 현재 곡이 라라라러브송(Index 2)일 때 실행
-    const nextBtn = document.getElementById('next-track');
-    if (nextBtn) {
-        const checkNext = function() {
-            if (typeof currentTrackIndex !== 'undefined' && currentTrackIndex === 2) {
-                triggerMusicToast();
-            }
-        };
-        nextBtn.addEventListener('mousedown', checkNext);
-        nextBtn.addEventListener('touchstart', checkNext);
-    }
-})();
 </script>
 </html>
