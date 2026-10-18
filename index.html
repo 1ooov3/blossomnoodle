@@ -73,6 +73,7 @@
             display: none;
             background-color: #000;
             color: #fff;
+            height: calc(100% - 35px);
         }
         .screen.active {
             display: block;
@@ -91,6 +92,7 @@
         }
         .time-info {
             text-align: center;
+            pointer-events: none; /* 클릭 이벤트가 부모(lock-screen)로 전달되도록 설정 */
         }
         .time-info .date {
             font-size: 16px;
@@ -102,11 +104,13 @@
             font-weight: 300;
             line-height: 1;
         }
+        
         /* 카톡 알림창 */
         .notification-container {
             margin-top: 25px;
             display: flex;
             justify-content: center;
+            pointer-events: auto; /* 알림창 영역은 독자적 클릭 가능하도록 복구 */
         }
         .noti-box {
             background: rgba(255, 255, 255, 0.15);
@@ -133,6 +137,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            text-align: left;
         }
         .noti-title {
             font-size: 14px;
@@ -144,12 +149,14 @@
             font-size: 13px;
             color: #e0e0e0;
         }
+        
         /* 하단 바 (전화, 카메라, 문구) */
         .lock-bottom {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding-bottom: 15px;
+            pointer-events: none; /* 클릭 이벤트가 부모로 전달되도록 설정 */
         }
         .bottom-icon {
             width: 44px;
@@ -341,13 +348,12 @@
             <div class="status-left">KT</div>
             <div class="status-right">
                 <span>81%</span>
-                <!-- 배터리 모양 아이콘 대용 -->
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17 5H7c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2z"/></svg>
             </div>
         </div>
 
         <!-- [화면 1] 잠금화면 -->
-        <div id="lock-screen" class="screen active" onclick="goToPinScreen(event)">
+        <div id="lock-screen" class="screen active" onclick="goToPinScreen()">
             <div class="lock-content">
                 <div class="time-info">
                     <div class="date">10월 6일 화요일</div>
@@ -356,6 +362,3 @@
                     <!-- 알림창 영역 -->
                     <div class="notification-container">
                         <div class="noti-box" id="kakao-noti" onclick="clickNoti(event)">
-                            <img class="noti-icon" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDAg2IYnAdytH10MKmi6wsnn-UPwxjORKPyCsJ1ONzpQ&s=10" alt="카톡">
-                            <div class="noti-text">
-                                <div class="noti-title">덩이❤</div>
