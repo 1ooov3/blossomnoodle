@@ -5,354 +5,256 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>휴대폰</title>
     <style>
-        :root {
-            --phone-bg-color: #000000;
-            --main-text-color: #ffffff;
-            --sub-text-color: #aaaaaa;
-            --border-color: #222222;
-        }
-
+        /* 기본 스타일 초기화 */
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'SamsungOne', 'Pretendard', -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             user-select: none;
             -webkit-user-select: none;
         }
 
         body {
-            background-color: #121315;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            color: var(--main-text-color);
+            background-color: #eaeaea;
+            color: #ffffff;
         }
 
-        /* [틀] 프리미엄 갤럭시 스타일 프레임 */
+        /* 갤럭시 스타일 스마트폰 프레임 */
         .phone-frame {
-            width: 380px;
-            height: 820px;
-            background-color: var(--phone-bg-color);
-            border: 8px solid #2d3034;
-            border-radius: 46px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+            width: 100%;
+            max-width: 375px;
+            height: 100vh;
+            max-height: 812px;
+            background-color: #000000; /* 아무 무늬 없는 검정 배경 */
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
-        /* 갤럭시 전면 펀치홀 카메라 */
-        .punch-hole {
-            position: absolute;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 14px;
-            height: 14px;
-            background-color: #111111;
-            border-radius: 50%;
-            z-index: 100;
+        /* 데스크톱(PC) 브라우저 환경에서 폰 목업 테두리 부여 */
+        @media (min-width: 450px) {
+            .phone-frame {
+                border: 12px solid #222222;
+                border-radius: 40px;
+                height: 812px;
+            }
         }
 
-        /* 최상단 시스템 바 (오후 5:02, 배터리 81% 고정) */
+        /* 상단 상태바 */
         .status-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 38px;
+            height: 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 24px 0;
-            font-size: 13px;
+            padding: 0 24px;
+            font-size: 14px;
             font-weight: 500;
-            z-index: 90;
-            background: transparent;
-            color: var(--main-text-color);
-        }
-        .status-bar .r {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .battery-icon {
-            width: 22px;
-            height: 11px;
-            border: 1px solid var(--main-text-color);
-            border-radius: 3px;
-            position: relative;
-            padding: 1px;
-            margin-left: 2px;
-        }
-        .battery-level {
-            width: 81%; /* 81% 고정 */
-            height: 100%;
-            background-color: var(--main-text-color);
-            border-radius: 1px;
-        }
-
-        /* 스크린 공통 규격 (아무 무늬 없는 검정 배경) */
-        .screen {
             position: absolute;
-            inset: 0;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            background-color: var(--phone-bg-color);
-        }
-        .screen.active {
-            display: flex;
-        }
-
-        /* ----------------------------------
-           [화면 1] 잠금화면 (Lock Screen)
-        ----------------------------------- */
-        #lock-screen {
-            padding-top: 75px;
-            align-items: center;
-            cursor: pointer;
-        }
-        .clock-widget {
-            text-align: center;
-        }
-        .time-text {
-            font-size: 54px;
-            font-weight: 300;
-            line-height: 1;
-            letter-spacing: -0.5px;
-            color: var(--main-text-color);
-        }
-        .date-text {
-            font-size: 15px;
-            font-weight: 400;
-            color: var(--sub-text-color);
-            margin-top: 5px;
-        }
-
-        /* 알림센터 */
-        .noti-box {
-            width: calc(100% - 36px);
-            margin-top: 45px;
+            top: 0;
+            width: 100%;
             z-index: 10;
         }
-        .kakao-noti {
-            background: #161719; 
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 잠금화면 메인 컨테이너 */
+        .lock-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 70px 24px 40px 24px;
+            position: relative;
+        }
+
+        /* 날짜 및 시간 영역 */
+        .clock-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .clock-time {
+            font-size: 56px;
+            font-weight: 300;
+            line-height: 1.1;
+        }
+
+        .clock-date {
+            font-size: 16px;
+            font-weight: 400;
+            margin-top: 6px;
+            opacity: 0.9;
+        }
+
+        /* 카카오톡 알림 미리보기 창 */
+        .notification-card {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
             padding: 14px 16px;
             display: flex;
             align-items: center;
-            gap: 14px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
-        
-        /* 📱 카카오톡 공식 어플 스킨 디자인 (노란색 둥근네모 + 갈색 말풍선) */
-        .kako-app-icon {
-            width: 40px;
-            height: 40px;
-            background-color: #fef01b; 
-            border-radius: 13px;       
+
+        .notification-card:active {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* 카카오톡 앱 아이콘 (노란색 약간 둥근 네모 + 갈색 말풍선) */
+        .kakaotalk-icon {
+            width: 42px;
+            height: 42px;
+            background-color: #FEE500;
+            border-radius: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
             flex-shrink: 0;
+            position: relative;
         }
-        /* 갈색 말풍선 몸통 코드 */
-        .kako-app-icon::before {
-            content: '';
+
+        /* CSS로 구현한 갈색 말풍선 기호 */
+        .kakaotalk-icon::before {
+            content: "";
             width: 18px;
-            height: 14px;
-            background-color: #3a1d1d; 
-            border-radius: 6px;
-            position: absolute;
-            top: 12px;
-            left: 11px;
+            height: 16px;
+            background-color: #3C1E1E;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            position: relative;
+            top: -1px;
         }
-        /* 갈색 말풍선 꼬리 코드 */
-        .kako-app-icon::after {
-            content: '';
+
+        .kakaotalk-icon::after {
+            content: "";
             position: absolute;
-            top: 22px;
-            left: 12px;
-            width: 0;
-            height: 0;
-            border-top: 5px solid #3a1d1d;
+            border-top: 5px solid #3C1E1E;
             border-right: 5px solid transparent;
+            border-left: 3px solid transparent;
+            bottom: 13px;
+            left: 11px;
             transform: rotate(-15deg);
         }
 
-        .noti-info {
+        /* 알림 텍스트 콘텐츠 */
+        .notification-content {
             flex: 1;
-        }
-        .noti-sender {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--main-text-color);
-            margin-bottom: 3px;
-        }
-        .noti-msg {
-            font-size: 13px;
-            color: var(--sub-text-color);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
         }
 
-        /* 잠금화면 하단 요소 */
-        .lock-footer {
-            position: absolute;
-            bottom: 65px;
-            width: 100%;
+        .notification-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 32px;
         }
-        .footer-app-btn {
-            width: 44px;
-            height: 44px;
-            background: #161719;
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: var(--main-text-color);
-        }
-        .guide-text {
-            font-size: 13px;
-            color: var(--sub-text-color);
+
+        .app-name {
+            font-size: 12px;
+            color: #e0e0e0;
             font-weight: 400;
         }
 
-        /* ----------------------------------
-           [화면 2] PIN 암호 입력 화면
-        ----------------------------------- */
-        #pin-screen {
-            background: rgba(0, 0, 0, 0.9);
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
-        }
-        .pin-container {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-        .pin-instruction {
-            font-size: 16px;
-            color: var(--main-text-color);
-            margin-bottom: 20px;
-            height: 22px;
-        }
-        .pin-instruction.wrong {
-            color: #ff5252;
-            animation: shake 0.3s ease;
-        }
-        .indicator-dots {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-        }
-        .indicator-dot {
-            width: 12px;
-            height: 12px;
-            border: 2px solid var(--main-text-color);
-            border-radius: 50%;
-            transition: background 0.1s;
-        }
-        .indicator-dot.active {
-            background-color: var(--main-text-color);
+        .sender-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
         }
 
-        /* 다이얼 키패드 */
-        .numeric-keypad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px 24px;
-            width: 250px;
-        }
-        .num-key {
-            width: 66px;
-            height: 66px;
-            background: #161719;
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: var(--main-text-color);
-            cursor: pointer;
-        }
-        .num-key:active {
-            background: #25282c;
-        }
-        .num-key.blank {
-            background: transparent;
-            border: none;
-            cursor: default;
-        }
-
-        /* ----------------------------------
-           [화면 3] 갤럭시 홈 화면 (대기 구역)
-        ----------------------------------- */
-        #home-screen {
-            justify-content: center;
-            align-items: center;
-            color: var(--main-text-color);
-        }
-        .home-fallback-box {
-            text-align: center;
-            background: #161719;
-            border: 1px solid var(--border-color);
-            padding: 24px;
-            border-radius: 20px;
-            width: calc(100% - 40px);
-        }
-
-        /* ----------------------------------
-           [화면 4] 카카오톡 채팅방 구역
-        ----------------------------------- */
-        #chat-screen {
-            background-color: #121315;
-            color: var(--main-text-color);
-        }
-        .chat-topbar {
-            position: absolute;
-            top: 38px;
-            left: 0;
-            width: 100%;
-            height: 52px;
-            background-color: #161719;
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            font-weight: 700;
-            font-size: 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .chat-stream-area {
-            position: absolute;
-            top: 90px;
-            bottom: 46px;
-            left: 0;
-            width: 100%;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .kakao-bubble {
-            background: #25282c;
-            color: var(--main-text-color);
-            padding: 10px 14px;
-            border-radius: 0 12px 12px 12px;
-            max-width: 75%;
+        .message-text {
             font-size: 14px;
-            line-height: 1.4;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            color: #f0f0f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* ----------------------------------
-           [공통] 하단 내비게이션 소프트키 바
+        /* 하단 소프트바/인디케이터 구역 (추후 내비게이션 확장을 위함) */
+        .bottom-bar {
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .home-indicator {
+            width: 120px;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 갤럭시 스타일 휴대폰 프레임 -->
+    <div class="phone-frame">
+        
+        <!-- 상단 상태바 (시간 고정, 배터리 81% 고정) -->
+        <div class="status-bar">
+            <span class="status-time">5:02</span>
+            <div class="status-right">
+                <span>📶</span>
+                <span class="battery-text">81%</span>
+                <span>🔋</span>
+            </div>
+        </div>
+
+        <!-- 잠금화면 콘텐츠 메인 -->
+        <div class="lock-screen" id="lockScreen">
+            
+            <!-- 날짜 및 시간 고정 설정 -->
+            <div class="clock-area">
+                <div class="clock-time">5:02</div>
+                <div class="clock-date">10월 6일 화요일</div>
+            </div>
+
+            <!-- 카카오톡 알림 미리보기 창 -->
+            <div class="notification-card" id="kakaoNotification">
+                <!-- 커스텀 노란색/갈색 말풍선 카톡 아이콘 -->
+                <div class="kakaotalk-icon"></div>
+                
+                <!-- 알림 내용 -->
+                <div class="notification-content">
+                    <div class="notification-header">
+                        <span class="sender-name">덩이❤</span>
+                        <span class="app-name">지금</span>
+                    </div>
+                    <div class="message-text">형 나 수업끝났어</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 하단 영역 -->
+        <div class="bottom-bar">
+            <div class="home-indicator"></div>
+        </div>
+    </div>
+
+    <script>
+        // 다음 단계(잠금 해제 또는 알림 클릭 상호작용) 확장을 위한 기본 이벤트 바인딩
+        document.getElementById('kakaoNotification').addEventListener('click', function() {
+            // 이 자리에 다음 구현 단계의 액션을 연결할 예정입니다.
+            console.log('카톡 알림 클릭됨');
+        });
+    </script>
+</body>
+</html>
