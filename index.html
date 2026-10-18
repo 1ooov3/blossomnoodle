@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>휴대폰 잠금화면 및 카카오톡 연동</title>
+    <title>휴대폰</title>
     <style>
         * {
             box-sizing: border-box;
@@ -25,7 +25,7 @@
             width: 100%;
             max-width: 412px;
             height: 100vh;
-            max-height: 740px; /* 요구사항에 따라 세로 길이만 기존 892px에서 740px로 수정 */
+            max-height: 740px;
             background-color: #000000; /* 아무 무늬 없는 검정 배경 */
             position: relative;
             border-radius: 40px;
@@ -51,7 +51,7 @@
             padding: 0 24px;
             font-size: 14px;
             font-weight: 500;
-            z-index: 50; /* 모든 레이어 위 고정 */
+            z-index: 10;
         }
         .status-right {
             display: flex;
@@ -168,7 +168,7 @@
             align-items: center;
             position: relative;
         }
-        /* 반투명 원형 아이콘 스타일 적용 */
+        /* 제공된 사진 속 반투명 원형 아이콘 스타일 적용 */
         .action-button {
             width: 56px;
             height: 56px;
@@ -193,69 +193,6 @@
             stroke-linecap: round;
             stroke-linejoin: round;
         }
-
-        /* 1. 디자인 보존 및 모션 전환용 추가 스타일 */
-        .phone-frame { position: relative; overflow: hidden; }
-        
-        /* 기존 배치 요소를 잠금화면 레이어로 동적 정의 */
-        .lock-layer-active {
-            position: absolute; top: 40px; left: 0; width: 100%; height: calc(100% - 40px);
-            display: flex; flex-direction: column; cursor: pointer; z-index: 10;
-            transition: opacity 0.25s ease;
-        }
-        .lock-layer-active.fade-out { opacity: 0; pointer-events: none; }
-
-        /* 비밀번호(PIN) 입력 레이어 - 화면 중앙 배치 시스템 적용 */
-        .pin-layer {
-            position: absolute; top: 40px; left: 0; width: 100%; height: calc(100% - 40px);
-            background-color: #000000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; padding-bottom: 20px;
-            opacity: 0; pointer-events: none; transform: translateY(30px);
-            transition: opacity 0.25s ease, transform 0.3s ease; z-index: 20;
-            gap: 30px; /* 문구와 키패드 간의 거리를 가깝게 좁히는 핵심 축 */
-        }
-        .pin-layer.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
-        
-        /* 핀번호 문구 영역 위치 세정밀 조정 */
-        .p-header { text-align: center; margin-top: 0; }
-        .p-title { font-size: 19px; font-weight: 400; margin-bottom: 20px; color: #ffffff; }
-        .p-dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 16px; }
-        .p-dot { width: 12px; height: 12px; border: 2px solid #ffffff; border-radius: 50%; transition: background 0.1s; }
-        .p-dot.filled { background-color: #ffffff; }
-        .p-error { font-size: 14px; color: #ff4d4d; height: 20px; opacity: 0; transition: opacity 0.2s; }
-        
-        /* 모바일 키패드 격자 배열 */
-        .p-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 35px; width: 80%; max-width: 300px; }
-        .p-key { background: none; border: none; color: #ffffff; font-size: 28px; height: 64px; display: flex; justify-content: center; align-items: center; cursor: pointer; outline: none; }
-        .p-key:active { background-color: rgba(255, 255, 255, 0.1); border-radius: 50%; }
-        .p-key.txt-btn { font-size: 14px; color: #cccccc; }
-
-        /* 홈화면 레이어 */
-        .home-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #121212; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; opacity: 0; pointer-events: none; z-index: 30;
-        }
-        .home-layer.active { opacity: 1; pointer-events: auto; }
-
-        /* 카카오톡 대화방 레이어 */
-        .chat-layer {
-            position: absolute; top: 40px; left: 0; width: 100%; height: calc(100% - 40px);
-            background-color: #bacee0; display: flex; flex-direction: column;
-            opacity: 0; pointer-events: none; z-index: 40;
-        }
-        .chat-layer.active { opacity: 1; pointer-events: auto; }
-        .c-header { background-color: #bacee0; padding: 12px 16px; display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 17px; color: #000000; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .c-back { font-size: 20px; cursor: pointer; }
-        .c-area { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .c-date { align-self: center; background-color: rgba(0, 0, 0, 0.1); color: #ffffff; padding: 4px 12px; border-radius: 12px; font-size: 11px; }
-        .c-row { display: flex; gap: 8px; color: #000000; }
-        .c-prof { width: 40px; height: 40px; border-radius: 15px; object-fit: cover; }
-        .c-body { display: flex; flex-direction: column; gap: 4px; }
-        .c-name { font-size: 13px; color: #555555; font-weight: 500; }
-        .c-wrap { display: flex; align-items: flex-end; gap: 6px; }
-        .c-bubble { background-color: #ffffff; padding: 10px 12px; border-radius: 0 12px 12px 12px; font-size: 14.5px; max-width: 220px; line-height: 1.4; }
-        .c-time { font-size: 10px; color: #666666; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -271,3 +208,247 @@
                     <div class="battery-level"></div>
                     <div class="battery-tip"></div>
                 </div>
+            </div>
+        </div>
+        <!-- 중앙 화면 영역 (시계, 날짜, 알림) -->
+        <div class="lock-screen-center">
+            <div class="time">5:02</div>
+            <div class="date">10월 6일 화요일</div>
+            
+            <!-- 카카오톡 알림 미리보기 창 -->
+            <div class="notification-card">
+                <img class="kakao-icon" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDAg2IYnAdytH10MKmi6wsnn-UPwxjORKPyCsJ1ONzpQ&s=10" alt="카카오톡">
+                <div class="notification-content">
+                    <div class="noti-header">
+                        <span class="sender-name">덩이❤</span>
+                        <span class="noti-time">지금</span>
+                    </div>
+                    <div class="noti-text">형 나 수업끝났어</div>
+                </div>
+            </div>
+        </div>
+        <!-- 하단 영역 (안내 문구, 양쪽 아이콘) -->
+        <div class="lock-screen-bottom">
+            <div class="unlock-text">화면을 탭하여 잠금해제</div>
+            
+            <div class="bottom-action-bar">
+                <!-- 왼쪽 전화 아이콘 (사진 참고) -->
+                <div class="action-button" aria-label="전화기">
+                    <svg class="icon-svg" viewBox="0 0 24 24">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                </div>
+                
+                <!-- 오른쪽 카메라 아이콘 (사진 참고) -->
+                <div class="action-button" aria-label="카메라">
+                    <svg class="icon-svg" viewBox="0 0 24 24">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<style>
+    /* 1. 디자인 보존 및 모션 전환용 추가 스타일 */
+    .phone-frame { position: relative; overflow: hidden; }
+    
+    /* 기존 배치 요소를 잠금화면 레이어로 동적 정의 */
+    .lock-layer-active {
+        position: absolute; top: 40px; left: 0; width: 100%; height: calc(100% - 40px);
+        display: flex; flex-direction: column; cursor: pointer; z-index: 10;
+        transition: opacity 0.25s ease;
+    }
+    .lock-layer-active.fade-out { opacity: 0; pointer-events: none; }
+
+    /* 비밀번호(PIN) 입력 레이어 - 화면 중앙 배치 시스템 적용 */
+    .pin-layer {
+        position: absolute; top: 40px; left: 0; width: 100%; height: calc(100% - 40px);
+        background-color: #000000; display: flex; flex-direction: column;
+        justify-content: center; align-items: center; padding-bottom: 20px;
+        opacity: 0; pointer-events: none; transform: translateY(30px);
+        transition: opacity 0.25s ease, transform 0.3s ease; z-index: 20;
+        gap: 30px; /* 문구와 키패드 간의 거리를 가깝게 좁히는 핵심 축 */
+    }
+    .pin-layer.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    
+    /* 핀번호 문구 영역 위치 세정밀 조정 */
+    .p-header { text-align: center; margin-top: 0; }
+    .p-title { font-size: 19px; font-weight: 400; margin-bottom: 20px; color: #ffffff; }
+    .p-dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 16px; }
+    .p-dot { width: 12px; height: 12px; border: 2px solid #ffffff; border-radius: 50%; transition: background 0.1s; }
+    .p-dot.filled { background-color: #ffffff; }
+    .p-error { font-size: 14px; color: #ff4d4d; height: 20px; opacity: 0; transition: opacity 0.2s; }
+    
+    /* 모바일 키패드 격자 배열 */
+    .p-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 35px; width: 80%; max-width: 300px; }
+    .p-key { background: none; border: none; color: #ffffff; font-size: 28px; height: 64px; display: flex; justify-content: center; align-items: center; cursor: pointer; outline: none; }
+    .p-key:active { background-color: rgba(255, 255, 255, 0.1); border-radius: 50%; }
+    .p-key.txt-btn { font-size: 14px; color: #cccccc; }
+
+    /* 홈화면 레이어 */
+    .home-layer {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: #121212; display: flex; flex-direction: column;
+        justify-content: center; align-items: center; opacity: 0; pointer-events: none; z-index: 30;
+    }
+    .home-layer.active { opacity: 1; pointer-events: auto; }
+
+    /* 카카오톡 대화방 레이어 */
+    .chat-layer {
+        position: absolute; top: 40px; left: 0; width: 100%; height: calc(100% - 40px);
+        background-color: #bacee0; display: flex; flex-direction: column;
+        opacity: 0; pointer-events: none; z-index: 40;
+    }
+    .chat-layer.active { opacity: 1; pointer-events: auto; }
+    .c-header { background-color: #bacee0; padding: 12px 16px; display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 17px; color: #000000; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .c-back { font-size: 20px; cursor: pointer; }
+    .c-area { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .c-date { align-self: center; background-color: rgba(0, 0, 0, 0.1); color: #ffffff; padding: 4px 12px; border-radius: 12px; font-size: 11px; }
+    .c-row { display: flex; gap: 8px; color: #000000; }
+    .c-prof { width: 40px; height: 40px; border-radius: 15px; object-fit: cover; }
+    .c-body { display: flex; flex-direction: column; gap: 4px; }
+    .c-name { font-size: 13px; color: #555555; font-weight: 500; }
+    .c-wrap { display: flex; align-items: flex-end; gap: 6px; }
+    .c-bubble { background-color: #ffffff; padding: 10px 12px; border-radius: 0 12px 12px 12px; font-size: 14.5px; max-width: 220px; line-height: 1.4; }
+    .c-time { font-size: 10px; color: #666666; white-space: nowrap; }
+</style>
+
+<script>
+    // 2. 구조 자동 치료 및 동적 레이어 삽입 스크립트
+    const frame = document.querySelector('.phone-frame');
+    const centerPart = document.querySelector('.lock-screen-center');
+    const bottomPart = document.querySelector('.lock-screen-bottom');
+    const notiCard = document.querySelector('.notification-card');
+    const actionBtmBar = document.querySelector('.bottom-action-bar');
+
+    // 잠금화면 컨테이너 생성 후 안전 이식
+    const lockWrapper = document.createElement('div');
+    lockWrapper.id = 'dynamic-lock-screen';
+    lockWrapper.className = 'lock-layer-active';
+    
+    if(centerPart && bottomPart && frame) {
+        frame.appendChild(lockWrapper);
+        lockWrapper.appendChild(centerPart);
+        lockWrapper.appendChild(bottomPart);
+    }
+
+    // 신규 화면 구조 정의 후 주입
+    const extHTML = `
+        <div id="dynamic-pin-screen" class="pin-layer">
+            <div class="p-header">
+                <div class="p-title">PIN 번호를 입력하세요</div>
+                <div class="p-dots"><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div></div>
+                <div id="p-error-alert" class="p-error">비밀번호가 올바르지 않습니다.</div>
+            </div>
+            <div class="p-keypad">
+                <button class="p-key" onclick="pressPinNum('1')">1</button><button class="p-key" onclick="pressPinNum('2')">2</button><button class="p-key" onclick="pressPinNum('3')">3</button>
+                <button class="p-key" onclick="pressPinNum('4')">4</button><button class="p-key" onclick="pressPinNum('5')">5</button><button class="p-key" onclick="pressPinNum('6')">6</button>
+                <button class="p-key" onclick="pressPinNum('7')">7</button><button class="p-key" onclick="pressPinNum('8')">8</button><button class="p-key" onclick="pressPinNum('9')">9</button>
+                <button class="p-key txt-btn" onclick="resetPinCode()">초기화</button><button class="p-key" onclick="pressPinNum('0')">0</button><button class="p-key txt-btn" onclick="deletePinNum()">제거</button>
+            </div>
+        </div>
+        <div id="dynamic-home-screen" class="home-layer">
+            <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 8px;">스마트폰 홈화면</h2>
+            <p style="font-size: 14px; color: #aaaaaa; cursor:pointer;" onclick="backToLockHome()">클릭하면 다시 잠금화면으로 이동</p>
+        </div>
+        <div id="dynamic-chat-screen" class="chat-layer">
+            <div class="c-header"><span class="c-back" onclick="backToLockHome()">❮</span><span>덩이❤</span></div>
+            <div class="c-area">
+                <div class="c-date">10월 6일 화요일</div>
+                <div class="c-row">
+                    <img class="c-prof" src="https://gstatic.com">
+                    <div class="c-body">
+                        <div class="c-name">덩이❤</div>
+                        <div class="c-wrap"><div class="c-bubble">형 나 수업끝났어</div><div class="c-time">오후 5:02</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    if(frame) { frame.insertAdjacentHTML('beforeend', extHTML); }
+
+    // 3. 로직 및 클릭 이벤트 매핑
+    const REAL_PIN = "0801";
+    let inputPassword = "";
+    let flowDestination = "home";
+
+    // 어디를 클릭해도 비밀번호창으로 이동
+    lockWrapper.addEventListener('click', (e) => {
+        if(actionBtmBar && actionBtmBar.contains(e.target)) return;
+        flowDestination = "home";
+        openPinView();
+    });
+
+    // 카톡 알림 미리보기 클릭 시 
+    if(notiCard) {
+        notiCard.addEventListener('click', (e) => {
+            e.stopPropagation();
+            flowDestination = "chat";
+            openPinView();
+        });
+    }
+
+    function openPinView() {
+        lockWrapper.classList.add('fade-out');
+        document.getElementById('dynamic-pin-screen').classList.add('active');
+        resetPinCode();
+    }
+
+    window.pressPinNum = function(num) {
+        if (inputPassword.length >= 4) return;
+        inputPassword += num;
+        document.getElementById('p-error-alert').style.opacity = "0";
+        updatePinDotsUI();
+
+        if (inputPassword.length === 4) {
+            setTimeout(verifyInputPin, 150);
+        }
+    }
+
+    window.deletePinNum = function() {
+        if (inputPassword.length > 0) {
+            inputPassword = inputPassword.slice(0, -1);
+            updatePinDotsUI();
+        }
+    }
+
+    window.resetPinCode = function() {
+        inputPassword = "";
+        updatePinDotsUI();
+        document.getElementById('p-error-alert').style.opacity = "0";
+    }
+
+    function updatePinDotsUI() {
+        const dList = document.querySelectorAll('.p-dot');
+        dList.forEach((dot, index) => {
+            if (index < inputPassword.length) dot.classList.add('filled');
+            else dot.classList.remove('filled');
+        });
+    }
+
+    function verifyInputPin() {
+        if (inputPassword === REAL_PIN) {
+            document.getElementById('dynamic-pin-screen').classList.remove('active');
+            if (flowDestination === "chat") {
+                document.getElementById('dynamic-chat-screen').classList.add('active');
+            } else {
+                document.getElementById('dynamic-home-screen').classList.add('active');
+            }
+        } else {
+            document.getElementById('p-error-alert').style.opacity = "1";
+            inputPassword = "";
+            updatePinDotsUI();
+        }
+    }
+
+    window.backToLockHome = function() {
+        document.getElementById('dynamic-chat-screen').classList.remove('active');
+        document.getElementById('dynamic-home-screen').classList.remove('active');
+        document.getElementById('dynamic-pin-screen').classList.remove('active');
+        lockWrapper.classList.remove('fade-out');
+        resetPinCode();
+    }
+</script>
+</html>
