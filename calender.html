@@ -378,15 +378,30 @@
         // 2026년 10월 스케줄 데이터 정의
         const fixedEvents = [
             { start: "2026-10-04", end: "2026-10-05", text: "덩이랑 부산 여행", color: "event-pink" },
-            { start: "2026-10-08", end: "2026-10-08", text: "7주년❤️", color: "event-pink" },
-            { start: "2026-10-10", end: "2026-10-10", text: "데이트❤️", color: "event-pink" },
+            { start: "2026-10-08", end: "2026-10-08", text: "7주년 ♥", color: "event-pink" },
+            { start: "2026-10-10", end: "2026-10-10", text: "데이트", color: "event-pink" },
             { start: "2026-10-13", end: "2026-10-13", text: "김교수님 면담", color: "event-blue" },
             { start: "2026-10-14", end: "2026-10-14", text: "심사용 논문 초안 제출", color: "event-blue" },
             { start: "2026-10-16", end: "2026-10-16", text: "신청 마감일", color: "event-blue" },
             { start: "2026-10-19", end: "2026-10-19", text: "구구타 정기 결제", color: "event-blue" },
             { start: "2026-10-21", end: "2026-10-27", text: "성민이 중간고사", color: "event-red" },
-            { start: "2026-10-30", end: "2026-10-30", text: "데이트❤️", color: "event-pink" }
+            { start: "2026-10-30", end: "2026-10-30", text: "데이트", color: "event-pink" }
         ];
+        // 매년 반복되는 일정 (month: 1~12, day: 1~31)
+        const recurringEvents = [
+            { month: 8, day: 1, text: "덩이 생일❤️", color: "event-pink" }
+        ];
+        // 고정 일정 + 반복 일정을 지정한 연도 범위에 맞게 합쳐서 반환
+        function getAllEvents(fromYear, toYear) {
+            const list = [...fixedEvents];
+            for (let y = fromYear; y <= toYear; y++) {
+                recurringEvents.forEach(r => {
+                    const ds = `${y}-${String(r.month).padStart(2,'0')}-${String(r.day).padStart(2,'0')}`;
+                    list.push({ start: ds, end: ds, text: r.text, color: r.color });
+                });
+            }
+            return list;
+        }
         // 캘린더 연간 주차(Week of Year) 계산 로직
         function getWeekOfYear(date) {
             const target = new Date(date.valueOf());
@@ -413,8 +428,9 @@
             const weekEndDate = new Date(weekStartDate);
             weekEndDate.setDate(weekEndDate.getDate() + 6);
             const weekEndStr = formatDateStr(weekEndDate);
+            const allEvents = getAllEvents(weekStartDate.getFullYear(), weekEndDate.getFullYear());
             const segments = [];
-            fixedEvents.forEach(ev => {
+            allEvents.forEach(ev => {
                 if (ev.end < weekStartStr || ev.start > weekEndStr) return;
                 const evStart = parseDateStr(ev.start);
                 const evEnd = parseDateStr(ev.end);
