@@ -365,7 +365,7 @@
                 <div class="c-row">
                     <img class="c-prof" src="https://gstatic.com">
                     <div class="c-body">
-                        <div class="c-name">덩이❤️</div>
+                        <div class="c-name">덩이❤</div>
                         <div class="c-wrap"><div class="c-bubble">형 나 수업끝났어</div><div class="c-time">오후 5:02</div></div>
                     </div>
                 </div>
@@ -437,7 +437,8 @@
         if (inputPassword === REAL_PIN) {
             document.getElementById('dynamic-pin-screen').classList.remove('active');
             if (flowDestination === "chat") {
-                document.getElementById('dynamic-chat-screen').classList.add('active');
+                // [수정] 내부 레이어를 띄우는 대신 진짜 kakaochat.html 파일로 이동합니다.
+                window.location.href = "kakaochat.html";
             } else {
                 // 이 부분을 같은 파일의 레이어를 띄우는 대신 진짜 home.html 파일로 이동하도록 변경합니다.
                 window.location.href = "home.html";
@@ -448,7 +449,6 @@
             updatePinDotsUI();
         }
     }
-
     window.backToLockHome = function() {
         document.getElementById('dynamic-chat-screen').classList.remove('active');
         document.getElementById('dynamic-home-screen').classList.remove('active');
