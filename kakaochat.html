@@ -446,12 +446,74 @@
             <button class="send-btn" id="sendBtn" onclick="sendUserMessage()" style="background-color: #fee500; color: #000000; border: none; border-radius: 20px; width: 55px; height: 38px; font-size: 13px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0; white-space: nowrap;">전송</button>
         </div>
     <!-- 진입 시 스크롤을 최하단으로 자동 제어하는 모션 스크립트 -->
+    <!-- 참여형 채팅 및 입력창 전환 인터랙션 스크립트 -->
     <script>
-        window.onload = function() {
+        // 화면을 가장 아래로 부드럽게 내리는 함수
+        function scrollToBottom() {
             const chatArea = document.getElementById('chatArea');
             if (chatArea) {
                 chatArea.scrollTop = chatArea.scrollHeight;
             }
+        }
+
+        // 페이지 처음 들어왔을 때 스크롤 최하단 고정
+        window.onload = function() {
+            scrollToBottom();
+        }
+
+        // 전송 버튼 클릭 시 실행되는 모션 함수
+        function sendUserMessage() {
+            const chatArea = document.getElementById('chatArea');
+            const sendBtn = document.getElementById('sendBtn');
+            const chatInput = document.getElementById('chatInput');
+
+            // 중복 클릭 방지
+            if(sendBtn.disabled) return;
+            sendBtn.disabled = true;
+
+            // 1. 내 노란색 말풍선 ("그쪽으로 갈게") 채팅방에 추가
+            const myRow = document.createElement('div');
+            myRow.className = 'message-row me';
+            myRow.innerHTML = `
+                <div class="bubble-wrapper">
+                    <span class="chat-time">오후 5:02</span>
+                    <div class="bubble">그쪽으로 갈게</div>
+                </div>
+            `;
+            chatArea.appendChild(myRow);
+            scrollToBottom(); // 말풍선 생성 후 스크롤 내리기
+
+            // 2. 입력창을 기존의 일반 메시지 입력창 형태로 즉시 전환
+            chatInput.removeAttribute('readonly'); // 수정 금지 해제
+            chatInput.value = ""; // 기존 값 지우기
+            chatInput.placeholder = "메시지 입력"; // 회색 힌트 텍스트 넣기
+            chatInput.style.fontWeight = "normal"; // 글자 두께 원래대로
+            
+            // 전송 버튼도 일반 상태로 초기화 (다시 누를 수 있게)
+            sendBtn.disabled = false;
+            // 혹시 나중에 일반 전송 기능도 구현하실 수 있도록 클릭 이벤트를 지우거나 변경하지 않고 유지합니다.
+            sendBtn.setAttribute('onclick', ''); 
+
+            // 3. 1초(1000ms) 후에 덩이♥의 "빨리 와" 답장 도착 모션
+            setTimeout(() => {
+                const otherRow = document.createElement('div');
+                otherRow.className = 'message-row other';
+                otherRow.innerHTML = `
+                    <div class="chat-profile">
+                        <img src="smpro.png" alt="프로필" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span style="display:none;">👤</span>
+                    </div>
+                    <div class="chat-content-box">
+                        <span class="chat-name">덩이♥</span>
+                        <div class="bubble-wrapper">
+                            <div class="bubble">빨리 와</div>
+                            <span class="chat-time">오후 5:02</span>
+                        </div>
+                    </div>
+                `;
+                chatArea.appendChild(otherRow);
+                scrollToBottom(); // 답장 도착 후 스크롤 한 번 더 내리기
+            }, 1000);
         }
     </script>
 </body>
