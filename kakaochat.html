@@ -1,1 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴대폰 - 덩이♥ 채팅방</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        /* 갤럭시 스타일 스마트폰 프레임 (반응형 외곽 틀) */
+        .phone-frame {
+            width: 100%;
+            max-width: 412px;
+            height: 720px; 
+            background-color: #b2c7da; /* 카카오톡 기본 채팅방 배경색 */
+            position: relative;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 12px solid #2d2d2d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        /* 모바일 기기(화면 폭 450px 이하) 특수 규칙 */
+        @media (max-width: 450px) {
+            .phone-frame {
+                border: none;
+                border-radius: 0;
+                height: 90dvh; 
+                max-height: 90dvh; 
+            }
+        }
+        /* 상단 상태 바 */
+        .status-bar {
+            height: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10;
+            color: #000000;
+        }
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .battery-icon {
+            width: 22px;
+            height: 12px;
+            border: 1px solid #000000;
+            border-radius: 3px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 1px;
+            justify-content: flex-start;
+        }
+        .battery-level {
+            width: 81%;
+            height: 100%;
+            background-color: #000000;
+            border-radius: 1px;
+        }
+        .battery-tip {
+            width: 2px;
+            height: 4px;
+            background-color: #000000;
+            position: absolute;
+            right: -3px;
+            border-radius: 0 1px 1px 0;
+        }
+        /* 카카오톡 채팅방 헤더 */
+        .chat-header {
+            height: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            color: #000000;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .back-btn {
+            font-size: 20px;
+            font-weight: normal;
+        }
+        .header-right {
+            font-size: 20px;
+            cursor: pointer;
+        }
+        /* 채팅 메시지 전용 스크롤 내부 영역 */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto; /* 중간 구역만 독립 스크롤 구동 */
+            padding: 10px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* 우측 세로 스크롤바 생성 및 디자인 */
+        .chat-container::-webkit-scrollbar {
+            width: 5px;
+        }
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        /* 중앙 날짜 구분선 스타일 */
+        .date-divider {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .date-box {
+            background-color: rgba(0, 0, 0, 0.15);
+            color: #ffffff;
+            font-size: 11px;
+            padding: 5px 14px;
+            border-radius: 12px;
+        }
+        /* 말풍선 기본 구조 */
+        .message-row {
+            display: flex;
+            max-width: 85%;
+        }
+        /* 상대방(덩이♥) 대화 레이아웃 */
+        .message-row.other {
+            align-self: flex-start;
+        }
+        /* smpro.png 프로필 이미지 상자 정의 */
+        .chat-profile {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #7a6e9b;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .chat-profile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .chat-content-box {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .chat-name {
+            font-size: 12px;
+            color: #555555;
+        }
+        .bubble-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 5px;
+        }
+        .bubble {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 8px 12px;
+            border-radius: 0 12px 12px 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-break: break-all;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .chat-time {
+            font-size: 10px;
+            color: #777777;
+            white-space: nowrap;
+        }
+        /* 나(노란 말풍선) 대화 레이아웃 */
+        .message-row.me {
+            align-self: flex-end;
+            justify-content: flex-end;
+        }
+        .message-row.me .bubble {
+            background-color: #fee500;
+            border-radius: 12px 0 12px 12px;
+        }
+        /* 하단 가상 시스템 내비게이션 바 */
+        .system-nav-bar {
+            height: 48px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            color: #000000;
+            font-size: 18px;
+            border-top: 1px solid #f2f2f2;
+        }
+        .nav-key {
+            cursor: pointer;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 갤럭시 스타일 스마트폰 프레임 -->
+    <div class="phone-frame">
+        
+        <!-- 상단 상태 바 -->
+        <div class="status-bar">
+            <span class="status-time">오후 5:02</span>
+            <div class="status-right">
+                <span>81%</span>
+                <div class="battery-icon">
+                    <div class="battery-level"></div>
+                    <div class="battery-tip"></div>
+                </div>
+            </div>
+        </div>
+        <!-- 카카오톡 상단 헤더 메뉴 -->
+        <header class="chat-header">
+            <div class="header-left" onclick="location.href='kakao.html'">
+                <span class="back-btn">〈</span>
+                <span>덩이♥</span>
+            </div>
+            <div class="header-right">
+                <span>⋮</span>
+            </div>
+        </header>
+        <!-- 채팅 메시지 스크롤 구역 -->
+        <main class="chat-container" id="chatArea">
+            
+            <!-- 날짜구간 1 -->
+            <div class="date-divider">
+                <div class="date-box">2026년 8월 29일 토요일</div>
+            </div>
+            <div class="message-row other">
+                <div class="chat-profile">
+                    <img src="smpro.png" alt="프로필" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">👤</span>
+                </div>
+                <div class="chat-content-box">
+                    <span class="chat-name">덩이♥</span>
+                    <div class="bubble-wrapper">
+                        <div class="bubble">형 오고있어?</div>
+                        <span class="chat-time">오후 06:04</span>
+                    </div>
+                </div>
+            </div>
+            <div class="message-row me">
+                <div class="bubble-wrapper">
+                    <span class="chat-time">오후 6:06</span>
+                    <div class="bubble">웅 택시탔어</div>
+                </div>
+            </div>
+            <div class="message-row other">
+                <div class="chat-profile">
+                    <img src="smpro.png" alt="프로필" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">👤</span>
+                </div>
+                <div class="chat-content-box">
+                    <span class="chat-name">덩이♥</span>
+                    <div class="bubble-wrapper">
+                        <div class="bubble">올 때 아할점 가서 사과바 사와줘</div>
+                        <span class="chat-time">오후 06:07</span>
+                    </div>
+                </div>
+            </div>
+            <div class="message-row other">
+                <div class="chat-profile">
+                    <img src="smpro.png" alt="프로필" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">👤</span>
+                </div>
+                <div class="chat-content-box">
+                    <span class="chat-name">덩이♥</span>
+                    <div class="bubble-wrapper">
+                        <div class="bubble">그릭요거트바 블루베리맛도</div>
+                        <span class="chat-time">오후 06:07</span>
+                    </div>
+                </div>
+            </div>
+            <div class="message-row me">
+                <div class="bubble-wrapper">
+                    <span class="chat-time">오후 06:08</span>
+                    <div class="bubble">알겠어</div>
+                </div>
+            </div>
+                       <!-- 날짜구간 2 -->
+            <div class="date-divider">
+                <div class="date-box">2026년 9월 11일 금요일</div>
+            </div>
+            <div class="message-row other">
+                <div class="chat-profile">
+                    <img src="smpro.png" alt="프로필" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">👤</span>
+                </div>
+                <div class="chat-content-box">
+                    <span class="chat-name">덩이♥</span>
+                    <div class="bubble-wrapper">
+                        <div class="bubble">형 주말에 말랑이 사러 가자</div>
+                        <span class="chat-time">오후 03:15</span>
+                    </div>
+                </div>
+            </div>
+            <div class="message-row other">
+                <div class="chat-profile">
+                    <img src="smpro.png" alt="프로필" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">👤</span>
+                </div>
+                <div class="chat-content-box">
+                    <span class="chat-name">덩이♥</span>
+                    <div class="bubble-wrapper">
+                        <div class="bubble">내가 asmr 해줄게</div>
+                        <span class="chat-time">오후 03:15</span>
+                    </div>
+                </div>
+            </div>
+            <div class="message-row me">
+                <div class="bubble-wrapper">
+                    <span class="chat-time">오후 3:17</span>
+                    <div class="bubble">웅 가자</div>
+                </div>
+            </div>
+            <!-- 날짜구간 3 -->
+            <div class="date-divider">
+                <div class="date-box">2026년 9월 21일 월요일</div>
+            </div>
+            <div class="message-row me">
+                <div class="bubble-wrapper">
+                    <span class="chat-time">오후 5:37</span>
+                    <div class="bubble">성민아 오늘 집 같이 가자</div>
+                </div>
+            </div>
+            <div class="message-row me">
+                <div class="bubble-wrapper">
+                    <span class="chat-time">오후 5:37</span>
+                    <div class="bubble">수업 마치고 조금만 기다려줘</div>
+                </div>
+            </div>
+            <div class="message-row other">
+                <div class="chat-profile">
+                    <img src="smpro.png" alt="프로필" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">👤</span>
+                </div>
+                <div class="chat-content-box">
+                    <span class="chat-name">덩이♥</span>
+                    <div class="bubble-wrapper">
+                        <div class="bubble">그럼 형 옷 나 빌려줘</div>
+                        <span class="chat-time">오후 05:45</span>
+                    </div>
+                </div>
+            </div>
+            <div class="message-row other">
+                <div class="chat-profile">
+                    <img src="smpro.png" alt="프로필" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">👤</span>
+                </div>
+                <div class="chat-content-box">
+                    <span class="chat-name">덩이♥</span>
+                    <div class="bubble-wrapper">
+                        <div class="bubble">싫어?</div>
+                        <span class="chat-time">오후 05:53</span>
+                    </div>
+                </div>
+            </div>
+            <div class="message-row me">
+                <div class="bubble-wrapper">
+                    <span class="chat-time">오후 5:57</span>
+                    <div class="bubble">답장 늦어서 미안해 교수님이 뭐 좀 시키셔서ㅠㅠ</div>
+                </div>
+            </div>
+            <div class="message-row me">
+                <div class="bubble-wrapper">
+                    <span class="chat-time">오후 5:57</span>
+                    <div class="bubble">빌려줄게 연구실 도착하면 형 불러</div>
+                </div>
+            </div>
+            <div class="message-row other">
+                <div class="chat-profile">
+                    <img src="smpro.png" alt="프로필" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">👤</span>
+                </div>
+                <div class="chat-content-box">
+                    <span class="chat-name">덩이♥</span>
+                    <div class="bubble-wrapper">
+                        <div class="bubble">나 너무 무섭게 말했나?!?</div>
+                        <span class="chat-time">오후 05:58</span>
+                    </div>
+                </div>
+            </div>
+            <div class="message-row me">
+                <div class="bubble-wrapper">
+                    <span class="chat-time">오후 5:58</span>
+                    <div class="bubble">아니 귀여웠어ㅎㅎ</div>
+                </div>
+            </div>
+            <!-- 날짜구간 4 -->
+            <div class="date-divider">
+                <div class="date-box">2026년 10월 6일 화요일</div>
+            </div>
+            <div class="message-row other">
+                <div class="chat-profile">
+                    <img src="smpro.png" alt="프로필" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span style="display:none;">👤</span>
+                </div>
+                <div class="chat-content-box">
+                    <span class="chat-name">덩이♥</span>
+                    <div class="bubble-wrapper">
+                        <div class="bubble">형 나 수업 끝났어</div>
+                        <span class="chat-time">오후 05:01</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+ 
+        <!-- [수정] 전송 버튼 가로 정렬 및 크기 최적화 버전 -->
+        <div class="input-bar" style="background-color: #ffffff; padding: 12px 14px; display: flex; align-items: center; gap: 10px;">
+            <input type="text" placeholder="메시지 입력" class="input-box" style="flex: 1; background-color: #f2f3f5; border: none; border-radius: 20px; padding: 10px 18px; font-size: 14px; color: #000000; outline: none;">
+            <button class="send-btn" style="background-color: #fee500; color: #000000; border: none; border-radius: 20px; width: 55px; height: 38px; font-size: 13px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0; white-space: nowrap;">전송</button>
+        </div>
+    <!-- 진입 시 스크롤을 최하단으로 자동 제어하는 모션 스크립트 -->
+    <script>
+        window.onload = function() {
+            const chatArea = document.getElementById('chatArea');
+            if (chatArea) {
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
 
