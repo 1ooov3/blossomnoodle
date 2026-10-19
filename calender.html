@@ -44,7 +44,7 @@
                 max-height: 90dvh; 
             } 
         } 
-        /* 상단 상태 바 */ 
+        /* 상단 상태 바 (오후 5:02 고정) */ 
         .status-bar { 
             height: 40px; 
             display: flex; 
@@ -73,7 +73,7 @@
             padding: 1px; 
         } 
         .battery-level { 
-            width: 81%; 
+            width: 81%; /* 81퍼센트 시각화 고정 */
             height: 100%; 
             background-color: #000000; 
             border-radius: 1px; 
@@ -129,11 +129,11 @@
             font-size: 11px;
             font-weight: bold;
         }
-        /* 요일 헤더 세로줄 정렬 전용 */
+        /* 요일 헤더 */
         .weekdays-row {
             display: flex;
             background-color: #ffffff;
-            padding: 15px 0 10px 0;
+            padding: 15px 0 5px 0;
             font-size: 13px;
             font-weight: 500;
             text-align: center;
@@ -152,7 +152,7 @@
         .weekday.sun { color: #d9383a; }
         .weekday.sat { color: #4a90e2; }
         .weekday.normal { color: #666666; }
-        /* 달력 메인 본문 슬라이드 틀 */
+        /* 달력 본문 스크롤 영역 */
         .calendar-body-container {
             flex: 1;
             position: relative;
@@ -167,50 +167,52 @@
             width: 100%;
             top: 0;
             left: 0;
-            transition: transform 0.3s ease-out;
         }
-        /* 달력의 각 주(Row) 배치 */
+        /* 주단위 행(Row) 구조 */
         .calendar-row {
             display: flex;
             flex: 1;
-            border-bottom: 1px solid #f5f5f5;
-            min-height: 0;
+            border-bottom: 1px solid #f0f0f0;
+            position: relative;
         }
         .week-number {
             width: 40px;
             flex-shrink: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding-top: 6px;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 8px;
             font-size: 12px;
             color: #999999;
         }
-        .days-container {
-            display: flex;
+        
+        /* 날짜 및 일정을 겹쳐서 배치하기 위한 그리드 */
+        .row-grid-content {
             flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: auto 1fr; /* 1층: 날짜 숫자, 2층: 일정 막대들 */
+            position: relative;
         }
-        /* 개별 날짜 칸 스타일 */
-        .day-cell {
-            flex: 1;
+        /* 개별 날짜 칸의 기본 배경 세로선 조절 */
+        .day-bg-cell {
+            grid-row: 1 / span 2;
             border-right: 1px solid #fbfbfb;
             position: relative;
+        }
+        .day-bg-cell:last-child {
+            border-right: none;
+        }
+        /* 날짜 숫자 표시 구역 */
+        .day-number-wrapper {
+            grid-row: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding-top: 4px;
-            min-width: 0;
-        }
-        .day-cell:last-child {
-            border-right: none;
-        }
-        .day-top {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 32px;
+            height: 34px;
             justify-content: center;
+            z-index: 2;
         }
         .day-num {
             font-size: 14px;
@@ -222,8 +224,7 @@
             align-items: center;
             justify-content: center;
         }
-        /* 오늘 날짜 (10월 19일 강조 표시) */
-        .day-cell.today .day-num {
+        .day-number-wrapper.today .day-num {
             background-color: #000000;
             color: #ffffff;
             border-radius: 50%;
@@ -234,38 +235,51 @@
             color: #b5b5b5;
             margin-top: -2px;
         }
-        .day-cell.sun .day-num, .day-cell.holiday .day-num { color: #d9383a; }
-        .day-cell.sat .day-num { color: #4a90e2; }
-        .day-cell.other-month { opacity: 0.25; }
-        /* 일정 탭 바 스타일 */
-        .events-container {
-            width: 100%;
-            margin-top: 2px;
+        .day-number-wrapper.sun .day-num, .day-number-wrapper.holiday .day-num { color: #d9383a; }
+        .day-number-wrapper.sat .day-num { color: #4a90e2; }
+        .day-number-wrapper.other-month { opacity: 0.25; }
+        /* 일정 배치 레이어 */
+        .row-events-layer {
+            grid-row: 2;
+            grid-column: 1 / span 7;
             display: flex;
             flex-direction: column;
-            gap: 2px;
-            padding: 0 1px;
+            gap: 3px;
+            padding: 2px 2px 4px 2px;
+            position: relative;
         }
+        /* 일정 전체를 감싸는 주 단위 그리드 배치용 시스템 */
+        .events-grid-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            width: 100%;
+        }
+        /* ★ 일정 막대 스타일 변경 (글자 안 잘리도록 수정) ★ */
         .event-bar {
             font-size: 10px;
-            padding: 2px 4px;
+            padding: 3px 4px;
             color: white;
             border-radius: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%;
             text-align: center;
             font-weight: 500;
-            height: 16px;
-            line-height: 12px;
+            
+            /* 핵심 수정: 한 줄 공간 부족 시 두 줄 이상으로 줄바꿈 */
+            white-space: normal; 
+            word-break: break-all; 
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 16px;
         }
-        /* 각 일정 테마별 색상 기입 */
+        
+        /* 테마별 일정 색상 */
         .event-pink { background-color: #ff8fa3; }
         .event-red { background-color: #f25c5c; }
         .event-blue { background-color: #4ea8de; }
         .event-mint { background-color: #72efdd; color: #222222; }
-        /* 하단 고정 등록 버튼 */
+        /* 하단 푸터 */
         .calendar-footer {
             height: 70px;
             background-color: #ffffff;
@@ -303,9 +317,9 @@
 </head>
 <body>
     <div class="phone-frame">
-        <!-- 상단 상태 바 -->
+        <!-- 상단 상태 바 (오후 5:02 고정 및 배터리 81% 세팅) -->
         <div class="status-bar">
-            <div class="status-left" id="live-time">20:25</div>
+            <div class="status-left">오후 5:02</div>
             <div class="status-right">
                 <span>📶</span>
                 <div class="battery-icon">
@@ -314,10 +328,9 @@
                 </div>
             </div>
         </div>
-        <!-- 캘린더 상단 헤더 -->
+    <!-- 캘린더 상단 헤더 -->
         <div class="calendar-header">
             <div class="header-left">
-                <!-- 누르면 home.html로 이동하는 ≡ 버튼 -->
                 <a href="home.html" class="menu-btn">≡</a>
                 <div class="current-month" id="calendar-month-txt">10월</div>
             </div>
@@ -326,7 +339,7 @@
                 <span class="icon-btn today-icon">19</span>
             </div>
         </div>
- <!-- 요일 표시줄 (가로 폭 및 세로선 정렬 최적화) -->
+        <!-- 요일 표시줄 -->
         <div class="weekdays-row">
             <div class="week-number-space"></div>
             <div class="weekdays-days">
@@ -339,23 +352,20 @@
                 <div class="weekday sat">토</div>
             </div>
         </div>
-        <!-- 달력 메인 컨테이너 영역 -->
+        <!-- 달력 메인 그리드 바디 -->
         <div class="calendar-body-container" id="swipe-area">
-            <div class="calendar-grid" id="calendar-grid-box">
-                <!-- 자바스크립트를 통해 주차 및 날짜 셀이 동적으로 자동 생성됩니다 -->
-            </div>
+            <div class="calendar-grid" id="calendar-grid-box"></div>
         </div>
-        <!-- 하단 고정 바 -->
+        <!-- 하단 정보 및 추가 바 -->
         <div class="calendar-footer">
             <div class="footer-info-tag">10월 6일에 추가</div>
             <div class="add-btn">+</div>
         </div>
     </div>
     <script>
-        // 현재 상태 변수 설정 (기본값: 2026년 10월)
         let currentYear = 2026;
-        let currentMonth = 9; // 0부터 시작하므로 9는 10월을 의미합니다.
-        // 음력 표기 및 국가 공휴일 고정 데이터셋
+        let currentMonth = 9; // 10월 기본값 고정 (0부터 시작)
+        // 음력 일자 및 공휴일 텍스트 데이터셋 명시
         const dayMetadata = {
             "2026-10-03": { isHoliday: true, holidayName: "개천절" },
             "2026-10-05": { holidayName: "대체공휴일" },
@@ -367,7 +377,7 @@
             "2026-10-18": { lunar: "9.8" },
             "2026-10-25": { lunar: "9.15" }
         };
-        // 요청하신 2026년 10월 스케줄 데이터 정의
+        // 요청하신 2026년 10월 지정 스케줄 데이터 목록
         const fixedEvents = [
             { start: "2026-10-04", end: "2026-10-05", text: "덩이랑 부산 여행", color: "event-pink" },
             { start: "2026-10-08", end: "2026-10-08", text: "7주년 ♥", color: "event-pink" },
@@ -379,7 +389,7 @@
             { start: "2026-10-21", end: "2026-10-27", text: "성민이 중간고사", color: "event-red" },
             { start: "2026-10-30", end: "2026-10-30", text: "데이트", color: "event-pink" }
         ];
-        // 캘린더 연간 주차(Week of Year) 계산 로직
+        // 캘린더 전용 주차 계산 연산 함수
         function getWeekOfYear(date) {
             const target = new Date(date.valueOf());
             const dayNr = (date.getDay() + 6) % 7;
@@ -391,99 +401,107 @@
             }
             return 1 + Math.ceil((firstThursday - target) / 604800000);
         }
-        // 달력 화면 그리드 동적 생성 함수
+        // 달력 내부 날짜판 및 연속 일정 바 동적 빌드 함수
         function renderCalendar(year, month) {
-            // 헤더의 월 표시 갱신
             document.getElementById("calendar-month-txt").innerText = `${month + 1}월`;
-            
             const gridBox = document.getElementById("calendar-grid-box");
             gridBox.innerHTML = "";
-            // 달력 첫 주 일요일 날짜 판정 구하기
             const firstDayOfMonth = new Date(year, month, 1);
             const startOffset = firstDayOfMonth.getDay();
             const startDate = new Date(year, month, 1 - startOffset);
-            // 5주 스크린 배치 루프
             for (let w = 0; w < 5; w++) {
                 const rowObj = document.createElement("div");
                 rowObj.className = "calendar-row";
-                // 해당 주차 연동 연산 및 레이블 지정
                 const currentWeekDate = new Date(startDate);
                 currentWeekDate.setDate(startDate.getDate() + w * 7);
                 const weekNumText = getWeekOfYear(currentWeekDate);
+                // 주차 수치 엘리먼트 배치
                 const weekNumDiv = document.createElement("div");
                 weekNumDiv.className = "week-number";
                 weekNumDiv.innerText = weekNumText;
                 rowObj.appendChild(weekNumDiv);
-                // 일주일 7일 배치 레이아웃
-                const daysContainer = document.createElement("div");
-                daysContainer.className = "days-container";
+                // 주단위 그리드 내부 레이아웃 컨텐츠 박스 생성
+                const rowGridContent = document.createElement("div");
+                rowGridContent.className = "row-grid-content";
+                let weekDates = [];
                 for (let d = 0; d < 7; d++) {
                     const thisDate = new Date(startDate);
                     thisDate.setDate(startDate.getDate() + (w * 7 + d));
+                    weekDates.push(thisDate);
                     const dateStr = `${thisDate.getFullYear()}-${String(thisDate.getMonth()+1).padStart(2,'0')}-${String(thisDate.getDate()).padStart(2,'0')}`;
-                    const dayCell = document.createElement("div");
-                    dayCell.className = "day-cell";
-                    // 주말 여부 클래스 추가
-                    if (d === 0) dayCell.classList.add("sun");
-                    if (d === 6) dayCell.classList.add("sat");
-                    // 타 월 데이터 흐리게 조정
-                    if (thisDate.getMonth() !== month) {
-                        dayCell.classList.add("other-month");
-                    }
-                    // 10월 19일 검은색 원형 강조 마크 처리
+                    // 칸별 세로 구분선 배경 렌더링
+                    const bgCell = document.createElement("div");
+                    bgCell.className = "day-bg-cell";
+                    bgCell.style.gridColumn = `${d + 1}`;
+                    rowGridContent.appendChild(bgCell);
+                    // 1층 날짜 래퍼 디비전 설정
+                    const numWrapper = document.createElement("div");
+                    numWrapper.className = "day-number-wrapper";
+                    numWrapper.style.gridColumn = `${d + 1}`;
+                    if (d === 0) numWrapper.classList.add("sun");
+                    if (d === 6) numWrapper.classList.add("sat");
+                    if (thisDate.getMonth() !== month) numWrapper.classList.add("other-month");
                     if (thisDate.getFullYear() === 2026 && thisDate.getMonth() === 9 && thisDate.getDate() === 19) {
-                        dayCell.classList.add("today");
+                        numWrapper.classList.add("today");
                     }
-                    // 상단 레이블 영역 (날짜 + 음력/공휴일명)
-                    const dayTop = document.createElement("div");
-                    dayTop.className = "day-top";
                     const dayNum = document.createElement("div");
                     dayNum.className = "day-num";
                     dayNum.innerText = thisDate.getDate();
-                    dayTop.appendChild(dayNum);
-                    // 메타데이터 매핑 검증 기입
+                    numWrapper.appendChild(dayNum);
                     if (dayMetadata[dateStr]) {
                         const meta = dayMetadata[dateStr];
-                        if (meta.isHoliday) dayCell.classList.add("holiday");
-                        
+                        if (meta.isHoliday) numWrapper.classList.add("holiday");
                         if (meta.holidayName || meta.lunar) {
                             const infoLabel = document.createElement("div");
                             infoLabel.className = "lunar-date";
                             infoLabel.innerText = meta.holidayName || meta.lunar;
-                            dayTop.appendChild(infoLabel);
+                            numWrapper.appendChild(infoLabel);
                         }
                     }
-                    dayCell.appendChild(dayTop);
-                    // 스케줄 바를 담을 하단 컨테이너
-                    const eventsContainer = document.createElement("div");
-                    eventsContainer.className = "events-container";
-                    // 고정 스케줄 매칭 후 바 차트 바인딩
-                    fixedEvents.forEach(ev => {
-                        if (dateStr >= ev.start && dateStr <= ev.end) {
-                            const evBar = document.createElement("div");
-                            evBar.className = `event-bar ${ev.color}`;
-                            
-                            // 다일 일정의 첫날이거나, 주가 바뀌는 첫 일요일이거나, 월이 바뀌는 1일일 때만 텍스트를 노출하여 가독성을 높입니다.
-                            if (dateStr === ev.start || d === 0 || thisDate.getDate() === 1) {
-                                evBar.innerText = ev.text;
-                            }
-                            eventsContainer.appendChild(evBar);
-                        }
-                    });
-                    dayCell.appendChild(eventsContainer);
-                    daysContainer.appendChild(dayCell);
+                    rowGridContent.appendChild(numWrapper);
                 }
-                rowObj.appendChild(daysContainer);
+                // 2층 일정 배치용 단독 레이어 트랙 설정
+                const eventsLayer = document.createElement("div");
+                eventsLayer.className = "row-events-layer";
+                const eventsGridContainer = document.createElement("div");
+                eventsGridContainer.className = "events-grid-container";
+                // 해당 행(주차)의 시작일과 종료일 문자열 파싱 구하기
+                const firstDateOfWeek = weekDates[0];
+                const lastDateOfWeek = weekDates[6];
+                
+                const weekStartStr = `${firstDateOfWeek.getFullYear()}-${String(firstDateOfWeek.getMonth()+1).padStart(2,'0')}-${String(firstDateOfWeek.getDate()).padStart(2,'0')}`;
+                const weekEndStr = `${lastDateOfWeek.getFullYear()}-${String(lastDateOfWeek.getMonth()+1).padStart(2,'0')}-${String(lastDateOfWeek.getDate()).padStart(2,'0')}`;
+                fixedEvents.forEach(ev => {
+                    if (ev.end >= weekStartStr && ev.start <= weekEndStr) {
+                        
+                        let startCol = 1;
+                        if (ev.start > weekStartStr) {
+                            const evStartDate = new Date(ev.start);
+                            startCol = evStartDate.getDay() + 1;
+                        }
+                        let endCol = 8;
+                        if (ev.end < weekEndStr) {
+                            const evEndDate = new Date(ev.end);
+                            endCol = evEndDate.getDay() + 2;
+                        }
+                        const evBar = document.createElement("div");
+                        evBar.className = `event-bar ${ev.color}`;
+                        evBar.style.gridColumn = `${startCol} / ${endCol}`;
+                        evBar.innerText = ev.text;
+                        eventsGridContainer.appendChild(evBar);
+                    }
+                });
+                eventsLayer.appendChild(eventsGridContainer);
+                rowGridContent.appendChild(eventsLayer);
+                rowObj.appendChild(rowGridContent);
                 gridBox.appendChild(rowObj);
             }
         }
-        // 모바일 터치 스와이프 및 마우스 드래그 액션 바인딩
+        // 화면 터치 액션 및 드래그 바인딩 핸들러 구역
         const swipeArea = document.getElementById("swipe-area");
-        let startX = 0;
-        let startY = 0;
+        let startX = 0; let startY = 0;
         swipeArea.addEventListener("touchstart", (e) => {
-            startX = e.touches.clientX;
-            startY = e.touches.clientY;
+            startX = e.touches.clientX; startY = e.touches.clientY;
         }, { passive: true });
         swipeArea.addEventListener("touchend", (e) => {
             const diffX = e.changedTouches.clientX - startX;
@@ -496,29 +514,68 @@
                     currentMonth++;
                     if (currentMonth > 11) { currentMonth = 0; currentYear++; }
                 }
+                renderCalendar(currentYear, currentMonth); 
+ // 화면 터치 액션 및 드래그 바인딩 핸들러 구역
+        const swipeArea = document.getElementById("swipe-area");
+        let startX = 0; 
+        let startY = 0;
+        // 모바일 기기 터치 시작 이벤트 바인딩
+        swipeArea.addEventListener("touchstart", (e) => {
+            startX = e.touches[0].clientX; 
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+        // 모바일 기기 터치 종료 이벤트 바인딩 (이전 달 / 다음 달 무한 이동 계산)
+        swipeArea.addEventListener("touchend", (e) => {
+            const diffX = e.changedTouches[0].clientX - startX;
+            const diffY = e.changedTouches[0].clientY - startY;
+            // 상하 스크롤 오작동 방지용 판정 (가로 입력이 더 클 때만 전환)
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                if (diffX > 0) {
+                    // 오른쪽으로 드래그 시: 이전 달로 이동
+                    currentMonth--;
+                    if (currentMonth < 0) { 
+                        currentMonth = 11; 
+                        currentYear--; 
+                    }
+                } else {
+                    // 왼쪽으로 드래그 시: 다음 달로 이동
+                    currentMonth++;
+                    if (currentMonth > 11) { 
+                        currentMonth = 0; 
+                        currentYear++; 
+                    }
+                }
                 renderCalendar(currentYear, currentMonth);
             }
         }, { passive: true });
-        // PC 테스트 브라우저 환경 마우스 이벤트 보완
-        swipeArea.addEventListener("mousedown", (e) => {
-            startX = e.clientX;
-            startY = e.clientY;
+        // 데스크톱 PC 마우스 클릭 시작 이벤트 보완
+        swipeArea.addEventListener("mousedown", (e) => { 
+            startX = e.clientX; 
+            startY = e.clientY; 
         });
+        // 데스크톱 PC 마우스 뗐을 때 이벤트 보완
         swipeArea.addEventListener("mouseup", (e) => {
-            const diffX = e.clientX - startX;
+            const diffX = e.clientX - startX; 
             const diffY = e.clientY - startY;
+            
             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
                 if (diffX > 0) {
-                    currentMonth--;
-                    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+                    currentMonth--; 
+                    if (currentMonth < 0) { 
+                        currentMonth = 11; 
+                        currentYear--; 
+                    }
                 } else {
-                    currentMonth++;
-                    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+                    currentMonth++; 
+                    if (currentMonth > 11) { 
+                        currentMonth = 0; 
+                        currentYear++; 
+                    }
                 }
                 renderCalendar(currentYear, currentMonth);
             }
         });
-        // 초기 화면 구동 렌더링 함수 실행
+        // 초기 화면 인스턴스 출력 실행 (최초 실행 시 2026년 10월 기본 렌더링)
         renderCalendar(currentYear, currentMonth);
     </script>
 </body>
