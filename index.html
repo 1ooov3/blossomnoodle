@@ -20,30 +20,32 @@
             color: #ffffff;
             overflow: hidden;
         }
-        /* 갤럭시 스타일 스마트폰 프레임 (반응형 외곽 틀) */
-      .phone-frame {
-    width: 100%;
-    max-width: 412px;
-    /* dvh(Dynamic Viewport Height)를 사용하여 모바일 툴바를 제외한 실제 화면 높이에 100% 맞춥니다 */
-    height: 100dvh; 
-    /* 컴퓨터 화면에서는 너무 길어지지 않도록 화면 높이의 85% 수준으로 자동 제한합니다 */
-    max-height: 85vh; 
-    background-color: #000000;
-    position: relative;
-    border-radius: 40px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    border: 12px solid #2d2d2d;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+/* 갤럭시 스타일 스마트폰 프레임 (반응형 외곽 틀) */
+.phone-frame {
+  width: 100%;
+  max-width: 412px;
+  
+  /* [수정] 컴퓨터 화면에서 가로 412px, 세로 680px 고정 */
+  height: 680px; 
+  
+  background-color: #000000;
+  position: relative;
+  border-radius: 40px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 12px solid #2d2d2d;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }/* 모바일 기기(화면 폭 450px 이하)로 접속했을 때만 작동하는 특수 규칙 */
 @media (max-width: 450px) {
-    .phone-frame {
-        border: none;
-        border-radius: 0;
-        height: 100dvh; /* 모바일 브라우저 주소창 변동에 맞춰 실시간으로 늘고 줄어듦 */
-        max-height: 100dvh; /* 아래쪽이 절대 잘리지 않도록 꽉 채움 */
-    }
+  .phone-frame {
+    border: none;
+    border-radius: 0;
+    
+    /* [수정] 모바일 화면에서는 화면 높이의 80%로 자동 설정 */
+    height: 80dvh; 
+    max-height: 80dvh; 
+  }
 }
         /* 상단 상태 바 (배터리 및 시간 표시 영역) */
         .status-bar {
