@@ -335,19 +335,18 @@
         <!-- 카카오톡 내부 화면 디자인 구역 -->
         <div class="kakaotalk-container">
             
-            <!-- 카카오톡 상단 메뉴바 -->
+           <!-- 카카오톡 상단 메뉴바 (< 버튼 클릭 시 home.html 이동 연동) -->
             <header class="talk-header">
                 <div class="title-area">
-                    <span class="back-arrow">&#12296;</span>
+                    <span class="back-arrow" onclick="location.href='home.html'">〈</span>
                     <span>채팅</span>
                 </div>
                 <div class="icon-group">
-                    <span onclick="showToast()">&#128269;</span> 
-                    <span onclick="showToast()">&#10133;</span> 
-                    <span onclick="showToast()">&#9881;</span> 
+                    <span onclick="showToast()">🔍</span> 
+                    <span onclick="showToast()">➕</span> 
+                    <span onclick="showToast()">⚙</span> 
                 </div>
             </header>
-
          <!-- 11개 대화 목록 데이터 연동 및 전용 독립 스크롤 리스트 -->
             <main class="chat-list-area">
                 
