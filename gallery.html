@@ -1,1 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴대폰 - 갤러리</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        /* 갤럭시 스타일 스마트폰 프레임 (반응형 외곽 틀) */
+        .phone-frame {
+            width: 100%;
+            max-width: 412px;
+            height: 720px; 
+            background-color: #ffffff; /* 갤러리 앱 바탕색 화이트 */
+            position: relative;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 12px solid #2d2d2d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 모바일 기기 특수 규칙 */
+        @media (max-width: 450px) {
+            .phone-frame {
+                border: none;
+                border-radius: 0;
+                height: 90dvh; 
+                max-height: 90dvh; 
+            }
+        }
+
+        /* 상단 상태 바 (오후 5:02 / 81% 동기화 및 검은 텍스트) */
+        .status-bar {
+            height: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: 500;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 10;
+            color: #000000;
+        }
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .battery-icon {
+            width: 22px;
+            height: 12px;
+            border: 1px solid #000000;
+            border-radius: 3px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 1px;
+            justify-content: flex-start;
+        }
+        .battery-level {
+            width: 81%;
+            height: 100%;
+            background-color: #000000;
+            border-radius: 1px;
+        }
+        .battery-tip {
+            width: 2px;
+            height: 4px;
+            background-color: #000000;
+            position: absolute;
+            right: -3px;
+            border-radius: 0 1px 1px 0;
+        }
+
+        /* 갤러리 상단 타이틀바 구역 */
+        .gallery-header {
+            height: 50px;
+            margin-top: 40px; /* 상태바 여백 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            background-color: #ffffff;
+            color: #000000;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .back-btn {
+            font-size: 20px;
+            font-weight: normal;
+        }
+        .header-right {
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* 앨범 그리드 피드 영역 (스크롤바 없이 깔끔하게 고정) */
+        .gallery-content {
+            flex: 1;
+            padding: 8px 16px;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            overflow: hidden; /* 사진이 3개이므로 스크롤 비활성화 */
+        }
+
+        /* 2열 앨범 배치 배열 */
+        .album-row {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+        }
+
+        /* 개별 앨범 카드 컴포넌트 */
+        .album-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            width: calc(50% - 8px);
+        }
+
+        /* 라운딩 처리된 정사각형 커버 박스 */
+        .cover-box {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 24px; /* 첨부 이미지 특유의 부드러운 곡선 미학 반영 */
+            overflow: hidden;
+            background-color: #f1f3f5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .cover-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 앨범 라벨 정보 텍스트 (이름 + 카운트 개수) */
+        .album-info {
+            padding: 8px 4px 0 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .album-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #000000;
+        }
+        .photo-count {
+            font-size: 12px;
+            color: #8a8f98;
+        }
+
+        /* 스마트폰 가상 시스템 하단바 (뒤로가기 홈 연동) */
+        .system-nav-bar {
+            height: 48px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            color: #000000;
+            font-size: 18px;
+            border-top: 1px solid #f2f2f2;
+            z-index: 10;
+        }
+        .nav-key {
+            cursor: pointer;
+            padding: 10px 20px;
+        }
+
+        /* 하단에 부드럽게 나타나는 "지원하지 않는 기능입니다." 알림(토스트) 스타일 */
+        .toast-alert {
+            position: absolute;
+            bottom: 110px; /* 하단 네비게이션바 바로 위에 위치하도록 조정 */
+            left: 50%;
+            transform: translate(-50%, 50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            color: #ffffff;
+            padding: 10px 22px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 400;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .toast-alert.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 갤럭시 스타일 스마트폰 프레임 -->
+    <div class="phone-frame">
+        
+        <!-- 상단 고정 상태 바 -->
+        <div class="status-bar">
+            <span class="status-time">오후 5:02</span>
+            <div class="status-right">
+                <span>81%</span>
+                <div class="battery-icon">
+                    <div class="battery-level"></div>
+                    <div class="battery-tip"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 갤러리 메인 헤더 (상단 화살표 클릭 시 home.html 이동 연동) -->
+        <header class="gallery-header">
+            <div class="header-left" onclick="location.href='home.html'">
+                <span class="back-btn">〈</span>
+                <span>앨범</span>
+            </div>
+            <div class="header-right">
+                <span>⋮</span>
+            </div>
+        </header>
+
+        <!-- 3개 고정형 앨범 그리드 레이아웃 피드 구역 -->
+        <main class="gallery-content">
+            
+            <!-- 첫 번째 줄: 카메라 / 🐰 앨범 배치 -->
+            <div class="album-row">
+                <!-- 1. 카메라 -->
+                <div class="album-card" onclick="showToast()">
+                    <div class="cover-box">
+                        <img src="camera.jpg" alt="카메라" onerror="this.style.backgroundColor='#eaeaea';">
+                    </div>
+                    <div class="album-info">
+                        <span class="album-title">카메라</span>
+                        <span class="photo-count">511</span>
+                    </div>
+                </div>
+
+                <!-- 2. 🐰 -->
+                <div class="album-card" onclick="showToast()">
+                    <div class="cover-box">
+                        <img src="screenshot.jpg" alt="스크린샷" onerror="this.style.backgroundColor='#eaeaea';">
+                    </div>
+                    <div class="album-info">
+                        <span class="album-title">🐰</span>
+                        <span class="photo-count">414</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 두 번째 줄: 카메라(rabbit.jpg) 단독 앨범 배치 -->
+            <div class="album-row">
+                <!-- 3. 카메라 (rabbit.jpg) -->
+                <div class="album-card" onclick="showToast()">
+                    <div class="cover-box">
+                        <img src="rabbit.jpg" alt="토끼" onerror="this.style.backgroundColor='#eaeaea';">
+                    </div>
+                    <div class="album-info">
+                        <span class="album-title">카메라</span>
+                        <span class="photo-count">801</span>
+                    </div>
+                </div>
+                
+                <!-- 레이아웃 정렬 대칭을 맞추기 위한 빈 카드 공간 (투명 처리) -->
+                <div class="album-card" style="cursor: default; opacity: 0;"></div>
+            </div>
+
+        </main>
+
+        <!-- 스마트폰 가상 시스템 하단바 (〈 버튼 클릭 시 home.html 이동 연동) -->
+        <div class="system-nav-bar">
+            <span class="nav-key" style="font-size: 14px;">|||</span>
+            <span class="nav-key">○</span>
+            <span class="nav-key" onclick="location.href='home.html'">〈</span>
+        </div>
+
+        <!-- 부드럽게 솟아오르는 인앱 토스트 알림창 -->
+        <div id="custom-toast" class="toast-alert">지원하지 않는 기능입니다.</div>
+
+    </div>
+
+    <!-- 토스트 애니메이션 작동 스크립트 -->
+    <script>
+        let toastTimeout = null;
+
+        function showToast() {
+            const toast = document.getElementById('custom-toast');
+            
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+                toast.classList.remove('show');
+                setTimeout(() => {}, 10);
+            }
+            
+            toast.classList.add('show');
+            
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
 
