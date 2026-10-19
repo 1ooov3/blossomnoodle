@@ -439,10 +439,11 @@
             </div>
         </main>
  
-        <!-- [수정] 전송 버튼 가로 정렬 및 크기 최적화 버전 -->
+        <!-- [수정] 참여형 인터랙션 메시지 입력 폼 -->
         <div class="input-bar" style="background-color: #ffffff; padding: 12px 14px; display: flex; align-items: center; gap: 10px;">
-            <input type="text" placeholder="메시지 입력" class="input-box" style="flex: 1; background-color: #f2f3f5; border: none; border-radius: 20px; padding: 10px 18px; font-size: 14px; color: #000000; outline: none;">
-            <button class="send-btn" style="background-color: #fee500; color: #000000; border: none; border-radius: 20px; width: 55px; height: 38px; font-size: 13px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0; white-space: nowrap;">전송</button>
+            <!-- 글자색을 검은색(#000000)으로 고정하고 수정 및 삭제가 불가능하도록 readonly 부여 -->
+            <input type="text" value="그쪽으로 갈게" id="chatInput" readonly class="input-box" style="flex: 1; background-color: #f2f3f5; border: none; border-radius: 20px; padding: 10px 18px; font-size: 14px; color: #000000; outline: none; font-weight: 500;">
+            <button class="send-btn" id="sendBtn" onclick="sendUserMessage()" style="background-color: #fee500; color: #000000; border: none; border-radius: 20px; width: 55px; height: 38px; font-size: 13px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0; white-space: nowrap;">전송</button>
         </div>
     <!-- 진입 시 스크롤을 최하단으로 자동 제어하는 모션 스크립트 -->
     <script>
