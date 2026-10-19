@@ -1,1 +1,705 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>휴대폰</title>
+<style>
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+body {
+background-color: #1a1a1a;
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+color: #ffffff;
+overflow: hidden;
+}
+/* 갤럭시 스타일 스마트폰 프레임 (반응형 외곽 틀) */
+.phone-frame {
+width: 100%;
+max-width: 412px;
+
+/* [수정] 컴퓨터 화면에서 가로 412px, 세로 7200px 고정 */
+height: 720px;
+
+background-color: #000000;
+position: relative;
+border-radius: 40px;
+box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+border: 12px solid #2d2d2d;
+display: flex;
+flex-direction: column;
+overflow: hidden;
+}/* 모바일 기기(화면 폭 450px 이하)로 접속했을 때만 작동하는 특수 규칙 */
+@media (max-width: 450px) {
+.phone-frame {
+border: none;
+border-radius: 0;
+
+/* [수정] 모바일 화면에서는 화면 높이의 90%로 자동 설정 */
+height: 90dvh;
+max-height: 90dvh;
+}
+}
+/* 상단 상태 바 (배터리 및 시간 표시 영역) */
+.status-bar {
+height: 40px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 0 24px;
+font-size: 14px;
+font-weight: 500;
+z-index: 10;
+}
+.status-right {
+display: flex;
+align-items: center;
+gap: 6px;
+}
+/* 배터리 아이콘 모양 시각화 */
+.battery-icon {
+width: 22px;
+height: 12px;
+border: 1px solid #ffffff;
+border-radius: 3px;
+position: relative;
+display: flex;
+align-items: center;
+padding: 1px;
+}
+.battery-level {
+width: 81%;
+height: 100%;
+background-color: #ffffff;
+border-radius: 1px;
+}
+.battery-tip {
+width: 2px;
+height: 4px;
+background-color: #ffffff;
+position: absolute;
+right: -3px;
+border-radius: 0 1px 1px 0;
+}
+
+/* ================= 인스타 화면 영역 ================= */
+.screen {
+flex: 1;
+min-height: 0;
+position: relative;
+display: flex;
+flex-direction: column;
+background: #fff;
+color: #000;
+overflow: hidden;
+user-select: none;
+-webkit-user-select: none;
+}
+.screen svg { display: block; }
+.topbar {
+height: 44px;
+flex: 0 0 44px;
+display: grid;
+grid-template-columns: 1fr auto 1fr;
+align-items: center;
+padding: 0 14px;
+background: #fff;
+}
+.topbar .l { justify-self: start; cursor: pointer; display: flex; }
+.topbar .r { justify-self: end; display: flex; gap: 16px; }
+.logo {
+font-family: Georgia, "Times New Roman", serif;
+font-style: italic;
+font-weight: 700;
+font-size: 26px;
+letter-spacing: -0.5px;
+}
+.topbar .title { font-weight: 700; font-size: 16px; }
+.content {
+flex: 1;
+min-height: 0;
+overflow-y: auto;
+overflow-x: hidden;
+scrollbar-width: none;
+}
+.content::-webkit-scrollbar { display: none; }
+.content.noscroll { overflow: hidden; }
+
+/* 프로필 원형 + 스토리 띠 */
+.ring {
+width: var(--s);
+height: var(--s);
+border-radius: 50%;
+padding: 0;
+flex: 0 0 auto;
+position: relative;
+}
+.ring.on {
+padding: 2px;
+background: linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7);
+}
+.ring img {
+width: 100%;
+height: 100%;
+border-radius: 50%;
+object-fit: cover;
+background: #dbdbdb;
+border: 1px solid #dbdbdb;
+display: block;
+}
+.ring.on img { border: 2px solid #fff; }
+.badge {
+position: absolute;
+right: -2px;
+bottom: -2px;
+width: 22px;
+height: 22px;
+border-radius: 50%;
+background: #0095f6;
+border: 2px solid #fff;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+/* 스토리 목록 */
+.stories {
+display: flex;
+gap: 14px;
+padding: 10px 14px 12px;
+overflow-x: auto;
+overflow-y: hidden;
+scrollbar-width: none;
+cursor: grab;
+}
+.stories::-webkit-scrollbar { display: none; }
+.story-item {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 5px;
+flex: 0 0 auto;
+width: 70px;
+}
+.story-item span {
+font-size: 12px;
+max-width: 70px;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+.story-item img { pointer-events: none; }
+
+/* 게시물 */
+.post { padding-bottom: 8px; }
+.ph {
+height: 48px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 12px;
+}
+.phl { display: flex; align-items: center; gap: 9px; font-size: 14px; }
+.phl.link { cursor: pointer; }
+.media { position: relative; background: #efefef; }
+.slides {
+display: flex;
+overflow-x: auto;
+scroll-snap-type: x mandatory;
+scrollbar-width: none;
+}
+.slides::-webkit-scrollbar { display: none; }
+.slides img {
+flex: 0 0 100%;
+width: 100%;
+aspect-ratio: 1 / 1;
+object-fit: cover;
+scroll-snap-align: start;
+display: block;
+pointer-events: none;
+}
+.cnt {
+position: absolute;
+top: 10px;
+right: 10px;
+background: rgba(0,0,0,.65);
+color: #fff;
+font-size: 12px;
+padding: 3px 9px;
+border-radius: 12px;
+}
+.acts {
+height: 42px;
+display: flex;
+align-items: center;
+gap: 14px;
+padding: 0 12px;
+position: relative;
+}
+.acts .sp { flex: 1; }
+.dots {
+position: absolute;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+gap: 4px;
+}
+.dots i {
+width: 6px; height: 6px; border-radius: 50%; background: #c7c7c7; display: block;
+}
+.dots i.a { background: #0095f6; }
+.likes { padding: 0 12px; font-size: 14px; font-weight: 700; }
+.cap { padding: 3px 12px 0; font-size: 14px; line-height: 1.35; }
+.date { padding: 4px 12px 0; font-size: 12px; color: #8e8e8e; }
+
+/* 프로필 */
+.pinfo { display: flex; align-items: center; gap: 22px; padding: 10px 16px 0; }
+.stats { flex: 1; display: flex; justify-content: space-around; text-align: center; }
+.stat b { display: block; font-size: 17px; }
+.stat span { font-size: 13px; }
+.stat.click { cursor: pointer; }
+.pname { padding: 10px 16px 0; font-weight: 700; font-size: 14px; }
+.pbtns { display: flex; gap: 8px; padding: 12px 16px; }
+.pbtns div {
+flex: 1;
+height: 32px;
+border-radius: 8px;
+background: #efefef;
+font-size: 14px;
+font-weight: 700;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.pbtns div.blue { background: #dbeeff; color: #0064e0; }
+.tabrow {
+display: flex;
+justify-content: center;
+border-top: 1px solid #efefef;
+border-bottom: 1px solid #efefef;
+height: 42px;
+align-items: center;
+}
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; }
+.grid img {
+width: 100%;
+aspect-ratio: 1 / 1;
+object-fit: cover;
+display: block;
+background: #efefef;
+}
+.grid img.c { cursor: pointer; }
+
+/* 팔로잉 목록 */
+.ftabs { display: flex; border-bottom: 1px solid #dbdbdb; }
+.ftabs div {
+flex: 1;
+text-align: center;
+padding: 12px 0;
+font-size: 14px;
+font-weight: 700;
+color: #8e8e8e;
+border-bottom: 2px solid transparent;
+}
+.ftabs div.a { color: #000; border-bottom-color: #000; }
+.frow { display: flex; align-items: center; gap: 12px; padding: 8px 16px; }
+.frow .t { flex: 1; min-width: 0; }
+.frow .t b { display: block; font-size: 14px; }
+.frow .t span { font-size: 14px; color: #737373; }
+.frow .btn {
+background: #efefef;
+border-radius: 8px;
+padding: 7px 14px;
+font-size: 13px;
+font-weight: 700;
+white-space: nowrap;
+}
+
+/* 하단 내비게이션 */
+.nav {
+height: 50px;
+flex: 0 0 50px;
+display: flex;
+justify-content: space-around;
+align-items: center;
+border-top: 1px solid #efefef;
+background: #fff;
+}
+.nav > div { width: 52px; height: 42px; display: flex; align-items: center; justify-content: center; }
+.nav > div.ok { cursor: pointer; }
+.nav .me {
+width: 26px; height: 26px; border-radius: 50%; overflow: hidden;
+border: 1px solid #dbdbdb;
+}
+.nav .me.on { border: 2px solid #000; }
+.nav .me img { width: 100%; height: 100%; object-fit: cover; display: block; background: #dbdbdb; }
+
+/* 스토리 화면 */
+.story-view { position: absolute; inset: 0; background: #000; color: #fff; }
+.story-view > img.bg { width: 100%; height: 100%; object-fit: cover; display: block; }
+.story-top {
+position: absolute; top: 0; left: 0; right: 0;
+padding: 10px 10px 30px;
+background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,0));
+}
+.bar { height: 2px; background: rgba(255,255,255,.35); border-radius: 2px; overflow: hidden; }
+.bar i {
+display: block; height: 100%; width: 0; background: #fff;
+animation: fill 5s linear forwards;
+}
+@keyframes fill { from { width: 0; } to { width: 100%; } }
+.story-user { display: flex; align-items: center; gap: 9px; margin-top: 10px; font-size: 14px; font-weight: 700; color: #fff; }
+.story-user img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #555; }
+.story-bottom {
+position: absolute; left: 0; right: 0; bottom: 0;
+padding: 30px 12px 14px;
+display: flex; align-items: center; gap: 12px;
+background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.5));
+}
+.story-input {
+flex: 1; height: 44px; border: 1px solid rgba(255,255,255,.8);
+border-radius: 22px; padding: 0 16px; display: flex; align-items: center;
+font-size: 14px; color: rgba(255,255,255,.9);
+}
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <!-- 상단 상태 바: 시간/배터리는 이전 파일과 동일하게 맞춰서 쓰세요 -->
+  <div class="status-bar">
+    <span style="font-weight:700;">오후 5:02</span>
+    <div class="status-right">
+      <span style="font-weight:700;">81%</span>
+      <div class="battery-icon"><div class="battery-level"></div><div class="battery-tip"></div></div>
+    </div>
+  </div>
+  <div class="screen" id="screen"></div>
+</div>
+
+<script>
+/* ============ 데이터 ============ */
+const PEOPLE = {
+  'sserimiress':    { pic: 'istsr.png', name: '박세림' },
+  'f.alleninlove':  { pic: 'ista.png',  name: '앨런' },
+  'jun9mok00':      { pic: 'istjm.png', name: '구정모' },
+  'woooob.in':      { pic: 'istwb.png', name: '서우빈' },
+  'hamdust_':       { pic: 'istwj.png', name: '함원진' },
+  'min_h.ee':       { pic: 'istmh.png', name: '강민희' },
+  'hy30ngjun':      { pic: 'isthj.png', name: '송형준' },
+  'mygallery.o0ty': { pic: 'istty.png', name: '김태영' },
+  '_minanism':      { pic: 'istsm.png', name: '안성민' }
+};
+const ORDER = ['sserimiress','f.alleninlove','jun9mok00','woooob.in','hamdust_','min_h.ee','hy30ngjun','mygallery.o0ty','_minanism'];
+const STORY_USERS = ['_minanism','mygallery.o0ty','min_h.ee','f.alleninlove','woooob.in'];
+const ME = 'jun9mok00';
+
+const POSTS = {
+  sm_solo: { user: '_minanism', imgs: ['istgsmsolo.jpg'], likes: 2381, liked: true,  cap: '', date: '10월 4일' },
+  mh:      { user: 'min_h.ee',  imgs: ['istgsmmh.jpg'],   likes: 2297, liked: true,  cap: '917♡', date: '9월 17일' },
+  jm:      { user: 'jun9mok00', imgs: ['istgjm.jpg'],     likes: 2250, liked: false, cap: '', date: '9월 3일' },
+  sm_3:    { user: '_minanism', imgs: ['istgsm3.jpg'],    likes: 1832, liked: true,  cap: '구정모가 찍어준 사진', date: '9월 29일' },
+  sm_cf:   { user: '_minanism', imgs: ['istgsmcf1.jpg','istgsmcf2.jpg'], likes: 1881, liked: true, cap: '일일 카페알바덩', date: '8월 23일' }
+};
+const FEED = ['sm_solo', 'mh', 'jm'];
+/* 프로필/아이디 클릭 시 이동 가능한 사람 */
+const LINKS = { '_minanism': 'sm', 'jun9mok00': 'jm' };
+
+const PROFILES = {
+  jm: { user: 'jun9mok00', posts: 1, followers: '5.9만', following: 8, own: true,
+        grid: [ { img: 'istgjm.jpg', post: 'jm' } ] },
+  sm: { user: '_minanism', posts: 5, followers: '7.6만', following: 8, own: false,
+        grid: [ { img: 'istgsmsolo.jpg', post: 'sm_solo' },
+                { img: 'istgsm3.jpg',    post: 'sm_3' },
+                { img: 'istgsmcf1.jpg',  post: 'sm_cf' },
+                { img: 'istgsmlm1.jpg' },
+                { img: 'istgjm.jpg' } ] }
+};
+
+/* ============ 아이콘 ============ */
+const svg = (inner, s = 24, extra = '') =>
+  `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${inner}</svg>`;
+const I = {
+  back:  svg('<path d="M15 5l-7 7 7 7"/>'),
+  plus:  svg('<path d="M12 4v16M4 12h16"/>'),
+  send:  svg('<path d="M22 3L9.5 11.5"/><path d="M22 3l-7 18-5.5-9.5L2 7z"/>'),
+  heart: svg('<path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.3 3 4.5 6.6 4.5c2 0 3.5 1.1 5.4 3.2 1.9-2.1 3.4-3.2 5.4-3.2 3.6 0 5.7 3.8 4.2 7.3C19.5 16.4 12 21 12 21z"/>'),
+  heartOn: svg('<path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.3 3 4.5 6.6 4.5c2 0 3.5 1.1 5.4 3.2 1.9-2.1 3.4-3.2 5.4-3.2 3.6 0 5.7 3.8 4.2 7.3C19.5 16.4 12 21 12 21z"/>', 26, 'fill="#ed4956" stroke="#ed4956"'),
+  comment: svg('<path d="M21 11.5a8.5 8.5 0 1 0-3.6 7L21.5 21l-1.2-4.2A8.4 8.4 0 0 0 21 11.5z"/>'),
+  bookmark: svg('<path d="M6 3h12v18l-6-5-6 5z"/>'),
+  dots:  svg('<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>'),
+  vdots: svg('<circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="19" r="1.4" fill="currentColor"/>', 20),
+  homeOn:  svg('<path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/>', 26, 'fill="currentColor"'),
+  home:    svg('<path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/>', 26),
+  reels: svg('<rect x="3" y="3" width="18" height="18" rx="5"/><path d="M3 9h18M9 3l3 6M15 3l3 6"/><path d="M10 13l5 3-5 3z" fill="currentColor"/>', 26),
+  search: svg('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/>', 26),
+  grid:  svg('<rect x="3" y="3" width="5" height="5" fill="currentColor"/><rect x="9.5" y="3" width="5" height="5" fill="currentColor"/><rect x="16" y="3" width="5" height="5" fill="currentColor"/><rect x="3" y="9.5" width="5" height="5" fill="currentColor"/><rect x="9.5" y="9.5" width="5" height="5" fill="currentColor"/><rect x="16" y="9.5" width="5" height="5" fill="currentColor"/><rect x="3" y="16" width="5" height="5" fill="currentColor"/><rect x="9.5" y="16" width="5" height="5" fill="currentColor"/><rect x="16" y="16" width="5" height="5" fill="currentColor"/>', 22)
+};
+
+/* ============ 공통 조각 ============ */
+const pic = id => PEOPLE[id].pic;
+const av = (id, size, ring) =>
+  `<div class="ring ${ring ? 'on' : ''}" style="--s:${size}px"><img src="${pic(id)}" alt="" draggable="false"></div>`;
+const hasStory = id => STORY_USERS.includes(id);
+
+function postHTML(key) {
+  const p = POSTS[key];
+  const link = LINKS[p.user];
+  const click = link ? `onclick="go('${link}')"` : '';
+  const multi = p.imgs.length > 1;
+  return `
+  <div class="post">
+    <div class="ph">
+      <div class="phl ${link ? 'link' : ''}" ${click}>${av(p.user, 34, hasStory(p.user))}<b>${p.user}</b></div>
+      ${I.dots}
+    </div>
+    <div class="media">
+      <div class="slides">${p.imgs.map(s => `<img src="${s}" alt="" draggable="false">`).join('')}</div>
+      ${multi ? `<div class="cnt">1/${p.imgs.length}</div>` : ''}
+    </div>
+    <div class="acts">
+      ${p.liked ? I.heartOn : I.heart}${I.comment}${I.send}
+      ${multi ? `<div class="dots">${p.imgs.map((_, i) => `<i class="${i === 0 ? 'a' : ''}"></i>`).join('')}</div>` : ''}
+      <div class="sp"></div>${I.bookmark}
+    </div>
+    <div class="likes">좋아요 ${p.likes}개</div>
+    <div class="cap"><b>${p.user}</b> ${p.cap}</div>
+    <div class="date">${p.date}</div>
+  </div>`;
+}
+
+function navHTML(active) {
+  return `
+  <div class="nav">
+    <div class="ok" onclick="go('home')">${active === 'home' ? I.homeOn : I.home}</div>
+    <div>${I.reels}</div>
+    <div>${I.send}</div>
+    <div>${I.search}</div>
+    <div class="ok" onclick="go('jm')"><div class="me ${active === 'me' ? 'on' : ''}"><img src="${pic(ME)}" alt="" draggable="false"></div></div>
+  </div>`;
+}
+
+function followingList(owner) {
+  const first = owner === ME ? '_minanism' : ME;
+  return [first, ...ORDER.filter(id => id !== owner && id !== first)];
+}
+
+/* ============ 화면별 HTML ============ */
+function homeView() {
+  const stories = `
+    <div class="stories" id="stories">
+      <div class="story-item" onclick="storyClick()">
+        <div class="ring on" style="--s:66px"><img src="${pic(ME)}" alt="" draggable="false">
+          <div class="badge">${svg('<path d="M12 5v14M5 12h14"/>', 12, 'stroke="#fff" stroke-width="3"')}</div>
+        </div>
+        <span>내 스토리</span>
+      </div>
+      ${STORY_USERS.map(id => `
+      <div class="story-item">${av(id, 66, true)}<span>${id}</span></div>`).join('')}
+    </div>`;
+  return {
+    nav: 'home',
+    html: `
+    <div class="topbar">
+      <div class="l" onclick="location.href='home.html'">${I.back}</div>
+      <div class="logo">Instagram</div>
+      <div class="r">${I.plus}${I.send}</div>
+    </div>
+    <div class="content">${stories}${FEED.map(postHTML).join('')}</div>`
+  };
+}
+
+function storyView() {
+  return {
+    nav: null,
+    html: `
+    <div class="story-view">
+      <img class="bg" src="iststr.webp" alt="" draggable="false">
+      <div class="story-top">
+        <div class="bar"><i></i></div>
+        <div class="story-user"><img src="${pic(ME)}" alt="" draggable="false"><span>${ME}</span></div>
+      </div>
+      <div class="story-bottom">
+        <div class="story-input">메시지 보내기...</div>
+        ${svg('<path d="M22 3L9.5 11.5"/><path d="M22 3l-7 18-5.5-9.5L2 7z"/>', 28, 'stroke="#fff"')}
+      </div>
+    </div>`
+  };
+}
+
+function profileView(key) {
+  const P = PROFILES[key];
+  const buttons = P.own
+    ? `<div>프로필 편집</div><div>프로필 공유</div>`
+    : `<div class="blue">팔로잉 ˅</div><div>메시지</div>`;
+  return {
+    nav: key === 'jm' ? 'me' : null,
+    html: `
+    <div class="topbar">
+      <div class="l" onclick="go('home')">${I.back}</div>
+      <div class="title">${P.user}</div>
+      <div class="r">${I.dots}</div>
+    </div>
+    <div class="content">
+      <div class="pinfo">
+        ${av(P.user, 82, false)}
+        <div class="stats">
+          <div class="stat"><b>${P.posts}</b><span>게시물</span></div>
+          <div class="stat"><b>${P.followers}</b><span>팔로워</span></div>
+          <div class="stat click" onclick="go('${key}-following')"><b>${P.following}</b><span>팔로잉</span></div>
+        </div>
+      </div>
+      <div class="pname">${PEOPLE[P.user].name}</div>
+      <div class="pbtns">${buttons}</div>
+      <div class="tabrow">${I.grid}</div>
+      <div class="grid">
+        ${P.grid.map(g => g.post
+          ? `<img class="c" src="${g.img}" alt="" draggable="false" onclick="go('post',{key:'${g.post}',back:'${key}'})">`
+          : `<img src="${g.img}" alt="" draggable="false">`).join('')}
+      </div>
+    </div>`
+  };
+}
+
+function followingView(key) {
+  const P = PROFILES[key];
+  const list = followingList(P.user);
+  return {
+    nav: key === 'jm' ? 'me' : null,
+    html: `
+    <div class="topbar">
+      <div class="l" onclick="go('${key}')">${I.back}</div>
+      <div class="title">${P.user}</div>
+      <div class="r">${svg('<path d="M12 5v14M5 12h14"/>', 22)}</div>
+    </div>
+    <div class="ftabs"><div>팔로워 ${P.followers}명</div><div class="a">팔로잉 ${P.following}명</div></div>
+    <div class="content">
+      ${list.map(id => `
+      <div class="frow">
+        ${av(id, 56, hasStory(id))}
+        <div class="t"><b>${id}</b><span>${PEOPLE[id].name}</span></div>
+        <div class="btn">${P.own ? '메시지 보내기' : '팔로잉'}</div>
+        ${P.own ? I.vdots : ''}
+      </div>`).join('')}
+    </div>`
+  };
+}
+
+function postView(key, back) {
+  return {
+    nav: back === 'jm' ? 'me' : null,
+    html: `
+    <div class="topbar">
+      <div class="l" onclick="go('${back}')">${I.back}</div>
+      <div class="title">게시물</div>
+      <div class="r"></div>
+    </div>
+    <div class="content noscroll">${postHTML(key)}</div>`
+  };
+}
+
+/* ============ 라우터 ============ */
+let state = { view: 'home' };
+let storyTimer = null;
+const screenEl = document.getElementById('screen');
+
+function go(view, extra) {
+  state = Object.assign({ view }, extra || {});
+  render();
+}
+
+function render() {
+  clearTimeout(storyTimer);
+  let v;
+  switch (state.view) {
+    case 'story': v = storyView(); break;
+    case 'jm': case 'sm': v = profileView(state.view); break;
+    case 'jm-following': v = followingView('jm'); break;
+    case 'sm-following': v = followingView('sm'); break;
+    case 'post': v = postView(state.key, state.back); break;
+    default: v = homeView();
+  }
+  screenEl.innerHTML = v.html + (v.nav ? navHTML(v.nav) : '');
+
+  if (state.view === 'story') {
+    /* 5초 뒤 자동으로 홈으로 */
+    storyTimer = setTimeout(() => go('home'), 5000);
+  }
+  bindScrollers();
+}
+
+/* ============ 스크롤/드래그 동작 ============ */
+let dragged = false;
+function storyClick() {
+  if (dragged) return;
+  go('story');
+}
+
+function bindScrollers() {
+  /* 스토리 줄: 마우스 휠 + 드래그로 좌우 이동 (터치는 기본 스크롤) */
+  const st = document.getElementById('stories');
+  if (st) {
+    st.addEventListener('wheel', e => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      const max = st.scrollWidth - st.clientWidth;
+      const next = st.scrollLeft + e.deltaY;
+      if ((e.deltaY > 0 && st.scrollLeft < max) || (e.deltaY < 0 && st.scrollLeft > 0)) {
+        e.preventDefault();
+        st.scrollLeft = Math.max(0, Math.min(max, next));
+      }
+    }, { passive: false });
+    enableDrag(st);
+  }
+
+  /* 여러 장 게시물: 좌우 넘기기 + 1/2 표시 갱신 */
+  document.querySelectorAll('.slides').forEach(sl => {
+    enableDrag(sl);
+    const media = sl.parentElement;
+    const cnt = media.querySelector('.cnt');
+    const dots = media.parentElement.querySelectorAll('.dots i');
+    sl.addEventListener('scroll', () => {
+      const i = Math.round(sl.scrollLeft / sl.clientWidth);
+      if (cnt) cnt.textContent = (i + 1) + '/' + sl.children.length;
+      dots.forEach((d, n) => d.classList.toggle('a', n === i));
+    });
+  });
+}
+
+function enableDrag(el) {
+  let down = false, startX = 0, startLeft = 0;
+  el.addEventListener('mousedown', e => {
+    down = true; dragged = false;
+    startX = e.pageX; startLeft = el.scrollLeft;
+    el.style.scrollSnapType = 'none';
+    el.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', e => {
+    if (!down) return;
+    const dx = e.pageX - startX;
+    if (Math.abs(dx) > 5) dragged = true;
+    el.scrollLeft = startLeft - dx;
+  });
+  window.addEventListener('mouseup', () => {
+    if (!down) return;
+    down = false;
+    el.style.cursor = '';
+    el.style.scrollSnapType = '';
+    if (el.classList.contains('slides')) {
+      const w = el.clientWidth;
+      el.scrollTo({ left: Math.round(el.scrollLeft / w) * w, behavior: 'smooth' });
+    }
+    setTimeout(() => { dragged = false; }, 0);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
 
