@@ -448,11 +448,13 @@
     <!-- 진입 시 스크롤을 최하단으로 자동 제어하는 모션 스크립트 -->
     <!-- 참여형 채팅 및 입력창 전환 인터랙션 스크립트 -->
     <!-- 참여형 멀티 트리거 채팅 및 자유 입력 전송 스크립트 -->
+    <!-- 참여형 멀티 트리거 채팅 및 상태 저장 스크립트 -->
     <script>
-        // 첫 번째 고정 메시지 전송 여부를 체크하는 변수
         let isFirstSendDone = false; 
 
-        // 화면을 가장 아래로 부드럽게 내리는 함수
+        // [추가] 진입 즉시 덩이 채팅방 읽음 처리 세션 저장
+        sessionStorage.setItem('dongi_read', 'true');
+
         function scrollToBottom() {
             const chatArea = document.getElementById('chatArea');
             if (chatArea) {
@@ -460,27 +462,27 @@
             }
         }
 
-        // 페이지 처음 들어왔을 때 스크롤 최하단 고정
         window.onload = function() {
             scrollToBottom();
         }
 
-        // 전송 버튼 통합 제어 함수
+        // [추가] 최신 대화 내용을 세션에 저장하는 함수
+        function saveLastMessage(text) {
+            sessionStorage.setItem('dongi_last_msg', text);
+        }
+
         function sendUserMessage() {
             const chatArea = document.getElementById('chatArea');
             const sendBtn = document.getElementById('sendBtn');
             const chatInput = document.getElementById('chatInput');
             const textValue = chatInput.value.trim();
 
-            // 입력창이 비어있으면 전송 안 됨
             if (!textValue) return;
 
-            // [Phase 1] 최초 "그쪽으로 갈게" 전송 이벤트 처리
             if (!isFirstSendDone) {
                 if (sendBtn.disabled) return;
                 sendBtn.disabled = true;
 
-                // 1. 내 고정 말풍선 추가
                 const myRow = document.createElement('div');
                 myRow.className = 'message-row me';
                 myRow.innerHTML = `
@@ -491,18 +493,18 @@
                 `;
                 chatArea.appendChild(myRow);
                 scrollToBottom();
+                
+                // [추가] 최신 대화 저장
+                saveLastMessage("그쪽으로 갈게");
 
-                // 2. 일반 입력창 형태로 즉시 오픈 (연속 전송 활성화)
                 chatInput.removeAttribute('readonly');
                 chatInput.value = "";
                 chatInput.placeholder = "메시지 입력";
                 chatInput.style.fontWeight = "normal";
                 sendBtn.disabled = false;
                 
-                // 첫 전송 완료 마킹
                 isFirstSendDone = true;
 
-                // 3. 1초 뒤 첫 번째 고정 답장 ("빨리 와") 도착
                 setTimeout(() => {
                     const otherRow = document.createElement('div');
                     otherRow.className = 'message-row other';
@@ -521,12 +523,12 @@
                     `;
                     chatArea.appendChild(otherRow);
                     scrollToBottom();
+                    
+                    // [추가] 최신 대화 저장
+                    saveLastMessage("빨리 와");
                 }, 1000);
 
             } else {
-                // [Phase 2] "빨리 와" 이후 실제 방문자들의 자유 대화 & 트리거 작동 규칙
-                
-                // 1. 방문자가 실제로 입력창에 타이핑한 글로 노란 말풍선 추가
                 const myRow = document.createElement('div');
                 myRow.className = 'message-row me';
                 myRow.innerHTML = `
@@ -537,25 +539,24 @@
                 `;
                 chatArea.appendChild(myRow);
                 scrollToBottom();
+                
+                // [추가] 방문자가 쓴 자유 대화 저장
+                saveLastMessage(textValue);
 
-                // 입력창 초기화 및 포커스 유지하여 연속 타이핑 편리하게 세팅
                 chatInput.value = "";
                 chatInput.focus();
 
-                // 2. 키워드 검증 및 덩이♥ 맞춤형 자동 답장 로직 구동
                 let replyMessage = "";
-
                 if (textValue.includes("보고싶어") || textValue.includes("보고싶다")) {
                     replyMessage = "그러니까 빨리 와";
                 } else if (textValue.includes("사랑해") || textValue.includes("좋아해")) {
-                    replyMessage = "라뷰💕";
+                    replyMessage = "라뷰";
                 } else if (textValue.includes("귀여워") || textValue.includes("귀엽다") || textValue.includes("귀엽네")) {
                     replyMessage = "내가 느끼한 말 하지 말랬지";
                 } else if (textValue.includes("배고파") || textValue.includes("배고프다")) {
                     replyMessage = "훠궈 먹으러 가자";
                 }
 
-                // 매칭되는 트리거 키워드가 있을 때만 1초 후 덩이♥의 개별 답장 생성
                 if (replyMessage !== "") {
                     setTimeout(() => {
                         const otherRow = document.createElement('div');
@@ -575,12 +576,14 @@
                         `;
                         chatArea.appendChild(otherRow);
                         scrollToBottom();
+                        
+                        // [추가] 트리거 답장 대화 저장
+                        saveLastMessage(replyMessage);
                     }, 1000);
                 }
             }
         }
 
-        // 엔터키를 쳤을 때도 스마트폰처럼 메시지가 부드럽게 전송되도록 지원하는 편리 기능
         document.getElementById('chatInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 sendUserMessage();
