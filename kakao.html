@@ -1,1 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴대폰 - 카카오톡</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        /* 갤럭시 스타일 스마트폰 프레임 (반응형 외곽 틀) */
+        .phone-frame {
+            width: 100%;
+            max-width: 412px;
+            height: 720px; 
+            background-color: #ffffff; /* 카카오톡 배경에 맞추어 화이트로 설정 */
+            position: relative;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 12px solid #2d2d2d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 모바일 기기(화면 폭 450px 이하) 특수 규칙 */
+        @media (max-width: 450px) {
+            .phone-frame {
+                border: none;
+                border-radius: 0;
+                height: 90dvh; 
+                max-height: 90dvh; 
+            }
+        }
+
+        /* 상단 상태 바 (텍스트 색상을 카카오톡 테마에 맞춰 블랙으로 변경) */
+        .status-bar {
+            height: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: 500;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 10;
+            color: #000000;
+        }
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .battery-icon {
+            width: 22px;
+            height: 12px;
+            border: 1px solid #000000;
+            border-radius: 3px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 1px;
+        }
+        .battery-level {
+            width: 81%;
+            height: 100%;
+            background-color: #000000;
+            border-radius: 1px;
+        }
+        .battery-tip {
+            width: 2px;
+            height: 4px;
+            background-color: #000000;
+            position: absolute;
+            right: -3px;
+            border-radius: 0 1px 1px 0;
+        }
+
+        /* 카카오톡 메인 컨테이너 */
+        .kakaotalk-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding-top: 40px; /* 상단 상태바 영역 확보 */
+            height: 100%;
+            color: #000000;
+            background-color: #ffffff;
+        }
+
+        /* 카카오톡 상단 타이틀 바 (채팅, 검색, 추가, 설정) */
+        .talk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .talk-header .title-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .talk-header .title-area .back-arrow {
+            font-size: 20px;
+            cursor: pointer;
+            font-weight: normal;
+        }
+        .talk-header .icon-group {
+            display: flex;
+            gap: 16px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* 채팅방 목록 영역 (다음 단계에서 상세 구현 예정인 비어있는 스크롤 공간) */
+        .chat-list-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+        .placeholder-text {
+            text-align: center;
+            color: #999990;
+            margin-top: 40px;
+            font-size: 14px;
+        }
+
+        /* 하단 탭바 규칙 */
+        .bottom-nav-bar {
+            height: 60px;
+            border-top: 1px solid #e5e5e5;
+            background-color: #fafafa;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 4px;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #666666;
+            cursor: pointer;
+            flex: 1;
+            height: 100%;
+            position: relative;
+        }
+        .nav-item .nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        /* 현재 활성화된 채팅 탭 스타일 (블랙 아이콘/글자) */
+        .nav-item.active {
+            color: #000000;
+            font-weight: bold;
+        }
+
+        /* 채팅 탭 안의 빨간색 읽지 않은 메시지 배지 */
+        .badge {
+            position: absolute;
+            top: 4px;
+            right: 24%;
+            background-color: #fe4343;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 2px 5px;
+            min-width: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 갤럭시 스타일 스마트폰 프레임 -->
+    <div class="phone-frame">
+        
+        <!-- 상단 상태 바 -->
+        <div class="status-bar">
+            <span class="status-time">11:43</span>
+            <div class="status-right">
+                <span>LTE</span>
+                <div class="battery-icon">
+                    <div class="battery-level"></div>
+                    <div class="battery-tip"></div>
+                </div>
+                <span>82%</span>
+            </div>
+        </div>
+
+        <!-- 카카오톡 내부 화면 디자인 구역 -->
+        <div class="kakaotalk-container">
+            
+            <!-- 카카오톡 상단 메뉴바 -->
+            <header class="talk-header">
+                <div class="title-area">
+                    <span class="back-arrow">&#12296;</span> <!-- < 모양 화살표 -->
+                    <span>채팅</span>
+                </div>
+                <div class="icon-group">
+                    <span onclick="alert('지원하지 않는 기능입니다')">&#128269;</span> <!-- 돋보기 -->
+                    <span onclick="alert('지원하지 않는 기능입니다')">&#10133;</span> <!-- 말풍선+ -->
+                    <span onclick="alert('지원하지 않는 기능입니다')">&#9881;</span> <!-- 설정 톱니바퀴 -->
+                </div>
+            </header>
+
+            <!-- 채팅 리스트 영역 (다음 가이드에서 채워질 구역) -->
+            <main class="chat-list-area">
+                <p class="placeholder-text">여기에 채팅방 목록 코드가 생성될 예정입니다.</p>
+            </main>
+
+            <!-- 하단 탭바 (친구, 채팅, 뷰, 쇼핑, 더보기) -->
+            <nav class="bottom-nav-bar">
+                <div class="nav-item" onclick="showFeatureAlert()">
+                    <span class="nav-icon">&#128100;</span>
+                    <span>친구</span>
+                </div>
+                <!-- 채팅 탭은 기본 액티브 상태로 표기 -->
+                <div class="nav-item active">
+                    <span class="nav-icon">&#128172;</span>
+                    <span>채팅</span>
+                    <span class="badge">4</span> <!-- 이미지의 안 읽은 메시지 표시 -->
+                </div>
+                <div class="nav-item" onclick="showFeatureAlert()">
+                    <span class="nav-icon">&#9654;</span>
+                    <span>뷰</span>
+                </div>
+                <div class="nav-item" onclick="showFeatureAlert()">
+                    <span class="nav-icon">&#128091;</span>
+                    <span>쇼핑</span>
+                </div>
+                <div class="nav-item" onclick="showFeatureAlert()">
+                    <span class="nav-icon">&#8226;&#8226;&#8226;</span>
+                    <span>더보기</span>
+                </div>
+            </nav>
+
+        </div>
+
+    </div>
+
+    <script>
+        // 지원하지 않는 기능 탭 클릭 시 얼럿 띄우기 함수
+        function showFeatureAlert() {
+            alert("지원하지 않는 기능입니다");
+        }
+    </script>
+</body>
+</html>
 
