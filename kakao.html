@@ -26,7 +26,7 @@
             width: 100%;
             max-width: 412px;
             height: 720px; 
-            background-color: #ffffff; /* 카카오톡 배경에 맞추어 화이트로 설정 */
+            background-color: #ffffff; 
             position: relative;
             border-radius: 40px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -46,7 +46,7 @@
             }
         }
 
-        /* 상단 상태 바 (텍스트 색상을 카카오톡 테마에 맞춰 블랙으로 변경) */
+        /* 상단 상태 바 */
         .status-bar {
             height: 40px;
             display: flex;
@@ -96,13 +96,13 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding-top: 40px; /* 상단 상태바 영역 확보 */
+            padding-top: 40px; 
             height: 100%;
             color: #000000;
             background-color: #ffffff;
         }
 
-        /* 카카오톡 상단 타이틀 바 (채팅, 검색, 추가, 설정) */
+        /* 카카오톡 상단 메뉴바 */
         .talk-header {
             display: flex;
             justify-content: space-between;
@@ -128,7 +128,7 @@
             cursor: pointer;
         }
 
-        /* 채팅방 목록 영역 (다음 단계에서 상세 구현 예정인 비어있는 스크롤 공간) */
+        /* 채팅방 목록 영역 */
         .chat-list-area {
             flex: 1;
             overflow-y: auto;
@@ -136,7 +136,7 @@
         }
         .placeholder-text {
             text-align: center;
-            color: #999990;
+            color: #999999;
             margin-top: 40px;
             font-size: 14px;
         }
@@ -150,6 +150,7 @@
             justify-content: space-around;
             align-items: center;
             padding-bottom: 4px;
+            z-index: 10;
         }
         .nav-item {
             display: flex;
@@ -167,13 +168,10 @@
             font-size: 20px;
             margin-bottom: 2px;
         }
-        /* 현재 활성화된 채팅 탭 스타일 (블랙 아이콘/글자) */
         .nav-item.active {
             color: #000000;
             font-weight: bold;
         }
-
-        /* 채팅 탭 안의 빨간색 읽지 않은 메시지 배지 */
         .badge {
             position: absolute;
             top: 4px;
@@ -186,6 +184,31 @@
             padding: 2px 5px;
             min-width: 16px;
             text-align: center;
+        }
+
+        /* [추가] 하단에 부드럽게 나타나는 토스트 알림 스타일 */
+        .toast-alert {
+            position: absolute;
+            bottom: 80px; /* 카카오톡 하단 탭바(60px) 위에 배치되도록 조정 */
+            left: 50%;
+            transform: translate(-50%, 50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            color: #ffffff;
+            padding: 10px 22px;
+            border-radius: 23px;
+            font-size: 13px;
+            font-weight: 400;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        /* 알림창이 활성화되었을 때 위로 슥 올라오며 나타나는 효과 */
+        .toast-alert.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
         }
     </style>
 </head>
@@ -213,42 +236,41 @@
             <!-- 카카오톡 상단 메뉴바 -->
             <header class="talk-header">
                 <div class="title-area">
-                    <span class="back-arrow">&#12296;</span> <!-- < 모양 화살표 -->
+                    <span class="back-arrow">&#12296;</span>
                     <span>채팅</span>
                 </div>
                 <div class="icon-group">
-                    <span onclick="alert('지원하지 않는 기능입니다')">&#128269;</span> <!-- 돋보기 -->
-                    <span onclick="alert('지원하지 않는 기능입니다')">&#10133;</span> <!-- 말풍선+ -->
-                    <span onclick="alert('지원하지 않는 기능입니다')">&#9881;</span> <!-- 설정 톱니바퀴 -->
+                    <span onclick="showToast()">&#128269;</span> 
+                    <span onclick="showToast()">&#10133;</span> 
+                    <span onclick="showToast()">&#9881;</span> 
                 </div>
             </header>
 
-            <!-- 채팅 리스트 영역 (다음 가이드에서 채워질 구역) -->
+            <!-- 채팅 리스트 영역 -->
             <main class="chat-list-area">
                 <p class="placeholder-text">여기에 채팅방 목록 코드가 생성될 예정입니다.</p>
             </main>
 
-            <!-- 하단 탭바 (친구, 채팅, 뷰, 쇼핑, 더보기) -->
+            <!-- 하단 탭바 -->
             <nav class="bottom-nav-bar">
-                <div class="nav-item" onclick="showFeatureAlert()">
+                <div class="nav-item" onclick="showToast()">
                     <span class="nav-icon">&#128100;</span>
                     <span>친구</span>
                 </div>
-                <!-- 채팅 탭은 기본 액티브 상태로 표기 -->
                 <div class="nav-item active">
                     <span class="nav-icon">&#128172;</span>
                     <span>채팅</span>
-                    <span class="badge">4</span> <!-- 이미지의 안 읽은 메시지 표시 -->
+                    <span class="badge">3</span> 
                 </div>
-                <div class="nav-item" onclick="showFeatureAlert()">
+                <div class="nav-item" onclick="showToast()">
                     <span class="nav-icon">&#9654;</span>
                     <span>뷰</span>
                 </div>
-                <div class="nav-item" onclick="showFeatureAlert()">
+                <div class="nav-item" onclick="showToast()">
                     <span class="nav-icon">&#128091;</span>
                     <span>쇼핑</span>
                 </div>
-                <div class="nav-item" onclick="showFeatureAlert()">
+                <div class="nav-item" onclick="showToast()">
                     <span class="nav-icon">&#8226;&#8226;&#8226;</span>
                     <span>더보기</span>
                 </div>
@@ -256,14 +278,34 @@
 
         </div>
 
+        <!-- [추가] 동적 알림창 레이어 주입 (스마트폰 프레임 내부 최하단에 배치) -->
+        <div id="custom-toast" class="toast-alert">지원하지 않는 기능입니다.</div>
+
     </div>
 
     <script>
-        // 지원하지 않는 기능 탭 클릭 시 얼럿 띄우기 함수
-        function showFeatureAlert() {
-            alert("지원하지 않는 기능입니다");
+        let toastTimeout = null;
+
+        // 토스트 알림 작동 함수
+        function showToast() {
+            const toast = document.getElementById('custom-toast');
+            
+            // 기존에 실행 중이던 타이머가 있다면 초기화 (연속 클릭 대응)
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+                toast.classList.remove('show');
+                // 부드러운 애니메이션 재적용을 위해 아주 짧은 틈을 둠
+                setTimeout(() => {}, 10);
+            }
+            
+            // 클래스를 추가하여 위로 슥 올라오며 투명도 1로 변경
+            toast.classList.add('show');
+            
+            // 2초(2000ms) 동안 유지한 후 자동으로 사라지게 설정
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
         }
     </script>
 </body>
 </html>
-
