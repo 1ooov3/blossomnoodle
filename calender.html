@@ -190,6 +190,7 @@
         .days-container {
             display: flex;
             flex-grow: 1;
+            position: relative; /* 일정 바 레이어의 기준 */
         }
         /* 개별 날짜 칸 스타일 */
         .day-cell {
@@ -222,7 +223,7 @@
             align-items: center;
             justify-content: center;
         }
-        /* 오늘 날짜 (10월 19일 강조 표시) */
+        /* 오늘 날짜 (10월 6일 강조 표시) */
         .day-cell.today .day-num {
             background-color: #000000;
             color: #ffffff;
@@ -237,28 +238,35 @@
         .day-cell.sun .day-num, .day-cell.holiday .day-num { color: #d9383a; }
         .day-cell.sat .day-num { color: #4a90e2; }
         .day-cell.other-month { opacity: 0.25; }
-        /* 일정 탭 바 스타일 */
-        .events-container {
-            width: 100%;
-            margin-top: 2px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            padding: 0 1px;
+        /* 일정 바 레이어: 한 주 전체를 덮고, 여러 날 일정은 칸을 가로질러 이어짐 */
+        .events-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            grid-auto-rows: auto;
+            row-gap: 2px;
+            align-items: start;
+            pointer-events: none;
         }
         .event-bar {
             font-size: 10px;
-            padding: 2px 4px;
+            padding: 2px 2px;
+            margin: 0 1px;
             color: white;
             border-radius: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%;
             text-align: center;
             font-weight: 500;
-            height: 16px;
-            line-height: 12px;
+            line-height: 1.25;
+            /* 글자가 잘리지 않고 칸 안에서 줄바꿈 되도록 설정 */
+            white-space: normal;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+            overflow: visible;
+            height: auto;
         }
         /* 각 일정 테마별 색상 기입 */
         .event-pink { background-color: #ff8fa3; }
@@ -305,9 +313,9 @@
     <div class="phone-frame">
         <!-- 상단 상태 바 -->
         <div class="status-bar">
-            <div class="status-left" id="live-time">20:25</div>
+            <div class="status-left" id="live-time">오후 5:02</div>
             <div class="status-right">
-                <span>📶</span>
+                <span>81%</span>
                 <div class="battery-icon">
                     <div class="battery-level"></div>
                     <div class="battery-tip"></div>
@@ -323,10 +331,10 @@
             </div>
             <div class="header-right">
                 <span class="icon-btn">🔍</span>
-                <span class="icon-btn today-icon">19</span>
+                <span class="icon-btn today-icon">6</span>
             </div>
         </div>
- <!-- 요일 표시줄 (가로 폭 및 세로선 정렬 최적화) -->
+        <!-- 요일 표시줄 (가로 폭 및 세로선 정렬 최적화) -->
         <div class="weekdays-row">
             <div class="week-number-space"></div>
             <div class="weekdays-days">
@@ -367,14 +375,14 @@
             "2026-10-18": { lunar: "9.8" },
             "2026-10-25": { lunar: "9.15" }
         };
-        // 요청하신 2026년 10월 스케줄 데이터 정의
+        // 2026년 10월 스케줄 데이터 정의
         const fixedEvents = [
             { start: "2026-10-04", end: "2026-10-05", text: "덩이랑 부산 여행", color: "event-pink" },
             { start: "2026-10-08", end: "2026-10-08", text: "7주년 ♥", color: "event-pink" },
             { start: "2026-10-10", end: "2026-10-10", text: "데이트", color: "event-pink" },
             { start: "2026-10-13", end: "2026-10-13", text: "김교수님 면담", color: "event-blue" },
             { start: "2026-10-14", end: "2026-10-14", text: "심사용 논문 초안 제출", color: "event-blue" },
-            { start: "2026-10-16", end: "2026-10-16", text: "신청 마감일", color: "event-mint" },
+            { start: "2026-10-16", end: "2026-10-16", text: "신청 마감일", color: "event-blue" },
             { start: "2026-10-19", end: "2026-10-19", text: "구구타 정기 결제", color: "event-blue" },
             { start: "2026-10-21", end: "2026-10-27", text: "성민이 중간고사", color: "event-red" },
             { start: "2026-10-30", end: "2026-10-30", text: "데이트", color: "event-pink" }
@@ -390,6 +398,52 @@
                 target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
             }
             return 1 + Math.ceil((firstThursday - target) / 604800000);
+        }
+        // "YYYY-MM-DD" 문자열 -> Date 변환 (시간대 오차 방지)
+        function parseDateStr(str) {
+            const p = str.split("-");
+            return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+        }
+        function formatDateStr(d) {
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+        // 한 주(일~토)에 걸치는 일정들을 칸 단위 조각으로 만들고, 겹치지 않게 줄(lane)을 배정
+        function buildWeekSegments(weekStartDate) {
+            const weekStartStr = formatDateStr(weekStartDate);
+            const weekEndDate = new Date(weekStartDate);
+            weekEndDate.setDate(weekEndDate.getDate() + 6);
+            const weekEndStr = formatDateStr(weekEndDate);
+            const segments = [];
+            fixedEvents.forEach(ev => {
+                if (ev.end < weekStartStr || ev.start > weekEndStr) return;
+                const evStart = parseDateStr(ev.start);
+                const evEnd = parseDateStr(ev.end);
+                const segStart = evStart < weekStartDate ? weekStartDate : evStart;
+                const segEnd = evEnd > weekEndDate ? weekEndDate : evEnd;
+                const colStart = Math.round((segStart - weekStartDate) / 86400000);
+                const colEnd = Math.round((segEnd - weekStartDate) / 86400000);
+                segments.push({ ev, colStart, colEnd, lane: 0 });
+            });
+            // 시작 칸이 빠른 순, 길이가 긴 순으로 정렬 후 빈 줄에 배치
+            segments.sort((a, b) => a.colStart - b.colStart || (b.colEnd - b.colStart) - (a.colEnd - a.colStart));
+            const lanes = [];
+            segments.forEach(seg => {
+                let placed = false;
+                for (let i = 0; i < lanes.length; i++) {
+                    const overlap = lanes[i].some(o => !(seg.colEnd < o.colStart || seg.colStart > o.colEnd));
+                    if (!overlap) {
+                        lanes[i].push(seg);
+                        seg.lane = i;
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) {
+                    lanes.push([seg]);
+                    seg.lane = lanes.length - 1;
+                }
+            });
+            return segments;
         }
         // 달력 화면 그리드 동적 생성 함수
         function renderCalendar(year, month) {
@@ -420,7 +474,7 @@
                 for (let d = 0; d < 7; d++) {
                     const thisDate = new Date(startDate);
                     thisDate.setDate(startDate.getDate() + (w * 7 + d));
-                    const dateStr = `${thisDate.getFullYear()}-${String(thisDate.getMonth()+1).padStart(2,'0')}-${String(thisDate.getDate()).padStart(2,'0')}`;
+                    const dateStr = formatDateStr(thisDate);
                     const dayCell = document.createElement("div");
                     dayCell.className = "day-cell";
                     // 주말 여부 클래스 추가
@@ -430,8 +484,8 @@
                     if (thisDate.getMonth() !== month) {
                         dayCell.classList.add("other-month");
                     }
-                    // 10월 19일 검은색 원형 강조 마크 처리
-                    if (thisDate.getFullYear() === 2026 && thisDate.getMonth() === 9 && thisDate.getDate() === 19) {
+                    // 10월 6일(이 휴대폰 세계의 오늘) 검은색 원형 강조 마크 처리
+                    if (thisDate.getFullYear() === 2026 && thisDate.getMonth() === 9 && thisDate.getDate() === 6) {
                         dayCell.classList.add("today");
                     }
                     // 상단 레이블 영역 (날짜 + 음력/공휴일명)
@@ -454,25 +508,20 @@
                         }
                     }
                     dayCell.appendChild(dayTop);
-                    // 스케줄 바를 담을 하단 컨테이너
-                    const eventsContainer = document.createElement("div");
-                    eventsContainer.className = "events-container";
-                    // 고정 스케줄 매칭 후 바 차트 바인딩
-                    fixedEvents.forEach(ev => {
-                        if (dateStr >= ev.start && dateStr <= ev.end) {
-                            const evBar = document.createElement("div");
-                            evBar.className = `event-bar ${ev.color}`;
-                            
-                            // 다일 일정의 첫날이거나, 주가 바뀌는 첫 일요일이거나, 월이 바뀌는 1일일 때만 텍스트를 노출하여 가독성을 높입니다.
-                            if (dateStr === ev.start || d === 0 || thisDate.getDate() === 1) {
-                                evBar.innerText = ev.text;
-                            }
-                            eventsContainer.appendChild(evBar);
-                        }
-                    });
-                    dayCell.appendChild(eventsContainer);
                     daysContainer.appendChild(dayCell);
                 }
+                // 일정 바 레이어 (여러 날 일정은 하나의 긴 바로 이어서 표시)
+                const eventsLayer = document.createElement("div");
+                eventsLayer.className = "events-layer";
+                buildWeekSegments(currentWeekDate).forEach(seg => {
+                    const evBar = document.createElement("div");
+                    evBar.className = `event-bar ${seg.ev.color}`;
+                    evBar.innerText = seg.ev.text;
+                    evBar.style.gridColumn = `${seg.colStart + 1} / ${seg.colEnd + 2}`;
+                    evBar.style.gridRow = `${seg.lane + 1}`;
+                    eventsLayer.appendChild(evBar);
+                });
+                daysContainer.appendChild(eventsLayer);
                 rowObj.appendChild(daysContainer);
                 gridBox.appendChild(rowObj);
             }
@@ -482,12 +531,12 @@
         let startX = 0;
         let startY = 0;
         swipeArea.addEventListener("touchstart", (e) => {
-            startX = e.touches.clientX;
-            startY = e.touches.clientY;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
         }, { passive: true });
         swipeArea.addEventListener("touchend", (e) => {
-            const diffX = e.changedTouches.clientX - startX;
-            const diffY = e.changedTouches.clientY - startY;
+            const diffX = e.changedTouches[0].clientX - startX;
+            const diffY = e.changedTouches[0].clientY - startY;
             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
                 if (diffX > 0) {
                     currentMonth--;
