@@ -257,6 +257,9 @@ width: 6px; height: 6px; border-radius: 50%; background: #c7c7c7; display: block
 .dots i.a { background: #0095f6; }
 .likes { padding: 0 12px; font-size: 14px; font-weight: 700; }
 .cap { padding: 3px 12px 0; font-size: 14px; line-height: 1.35; }
+.more { padding: 4px 12px 0; font-size: 14px; color: #8e8e8e; }
+.cm { padding: 2px 12px 0; font-size: 14px; line-height: 1.35; }
+.cm.re { padding-left: 36px; }
 .date { padding: 4px 12px 0; font-size: 12px; color: #8e8e8e; }
 
 /* 프로필 */
@@ -401,11 +404,16 @@ const STORY_USERS = ['_minanism','mygallery.o0ty','min_h.ee','f.alleninlove','wo
 const ME = 'jun9mok00';
 
 const POSTS = {
-  sm_solo: { user: '_minanism', imgs: ['istgsmsolo.jpg'], likes: 2381, liked: true,  cap: '', date: '10월 4일' },
-  mh:      { user: 'min_h.ee',  imgs: ['istgsmmh.jpg'],   likes: 2297, liked: true,  cap: '917♡', date: '9월 17일' },
+  sm_solo: { user: '_minanism', imgs: ['istgsmsolo.jpg'], likes: 2381, liked: true,  cap: '', date: '10월 4일',
+             more: 17, comments: [ { u: 'luvityy_', t: '오빠 잘생겼어요❤️❤️' } ] },
+  mh:      { user: 'min_h.ee',  imgs: ['istgsmmh.jpg'],   likes: 2297, liked: true,  cap: '917♡', date: '9월 17일',
+             more: 36, comments: [ { u: 'sserimiress', t: '미냐 생축🥳🥳🥳' }, { u: 'hy30ngjun', t: '미니야 생일축하한다🫶🏻🫶🏻' } ] },
   jm:      { user: 'jun9mok00', imgs: ['istgjm.jpg'],     likes: 2250, liked: false, cap: '', date: '9월 3일' },
   sm_3:    { user: '_minanism', imgs: ['istgsm3.jpg'],    likes: 1832, liked: true,  cap: '구정모가 찍어준 사진', date: '9월 29일' },
-  sm_cf:   { user: '_minanism', imgs: ['istgsmcf1.jpg','istgsmcf2.jpg'], likes: 1881, liked: true, cap: '일일 카페알바덩', date: '8월 23일' }
+  sm_cf:   { user: '_minanism', imgs: ['istgsmcf1.jpg','istgsmcf2.jpg'], likes: 1881, liked: true, cap: '일일 카페알바덩💕', date: '8월 23일',
+             more: 21, comments: [ { u: 'hamdust_', t: '덩구더하기 컨텐츠인가요?' }, { u: 'mygallery.o0ty', t: '덩구플러스인데', reply: true } ] },
+  sm_lm:   { user: '_minanism', imgs: ['istgsmlm1.jpg','istgsmlm2.jpg'], likes: 1852, liked: true, cap: 'sweet like lemonade ⚝', date: '8월 7일',
+             more: 16, comments: [ { u: 'f.alleninlove', t: '내가 찍어준 사진이다' }, { u: 'hamdust_', t: '짱 귀엽게 생겼네ㅎ' } ] }
 };
 const FEED = ['sm_solo', 'mh', 'jm'];
 /* 프로필/아이디 클릭 시 이동 가능한 사람 */
@@ -418,7 +426,7 @@ const PROFILES = {
         grid: [ { img: 'istgsmsolo.jpg', post: 'sm_solo' },
                 { img: 'istgsm3.jpg',    post: 'sm_3' },
                 { img: 'istgsmcf1.jpg',  post: 'sm_cf' },
-                { img: 'istgsmlm1.jpg' },
+                { img: 'istgsmlm1.jpg', post: 'sm_lm' },
                 { img: 'istgjm.jpg' } ] }
 };
 
@@ -470,6 +478,8 @@ function postHTML(key) {
     </div>
     <div class="likes">좋아요 ${p.likes}개</div>
     <div class="cap"><b>${p.user}</b> ${p.cap}</div>
+    ${p.comments ? `<div class="more">댓글 ${p.more}개 더보기</div>` +
+      p.comments.map(c => `<div class="cm ${c.reply ? 're' : ''}"><b>${c.u}</b> ${c.t}</div>`).join('') : ''}
     <div class="date">${p.date}</div>
   </div>`;
 }
@@ -557,7 +567,6 @@ function profileView(key) {
       </div>
       <div class="pname">${PEOPLE[P.user].name}</div>
       <div class="pbtns">${buttons}</div>
-      <div class="tabrow">${I.grid}</div>
       <div class="grid">
         ${P.grid.map(g => g.post
           ? `<img class="c" src="${g.img}" alt="" draggable="false" onclick="go('post',{key:'${g.post}',back:'${key}'})">`
@@ -581,7 +590,7 @@ function followingView(key) {
     <div class="ftabs"><div>팔로워 ${P.followers}명</div><div class="a">팔로잉 ${P.following}명</div></div>
     <div class="content">
       ${list.map(id => `
-      <div class="frow">
+      <div class="frow" ${LINKS[id] ? `onclick="go('${LINKS[id]}')" style="cursor:pointer"` : ''}>
         ${av(id, 56, hasStory(id))}
         <div class="t"><b>${id}</b><span>${PEOPLE[id].name}</span></div>
         <div class="btn">${P.own ? '메시지 보내기' : '팔로잉'}</div>
@@ -600,7 +609,7 @@ function postView(key, back) {
       <div class="title">게시물</div>
       <div class="r"></div>
     </div>
-    <div class="content noscroll">${postHTML(key)}</div>`
+    <div class="content">${postHTML(key)}</div>`
   };
 }
 
@@ -702,4 +711,3 @@ render();
 </script>
 </body>
 </html>
-
