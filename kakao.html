@@ -46,7 +46,7 @@
             }
         }
 
-        /* 상단 상태 바 */
+      /* 상단 상태 바 (기존 스타일 유지 및 디테일 최적화) */
         .status-bar {
             height: 40px;
             display: flex;
@@ -75,9 +75,12 @@
             display: flex;
             align-items: center;
             padding: 1px;
+            /* [정렬 수정] 잔량 수치가 81%로 바뀌었으므로 배터리 내부 게이지를 왼쪽부터 차오르게 설정 */
+            justify-content: flex-start; 
         }
         .battery-level {
-            width: 81%;
+            /* [수정] 요청하신 두 번째 사진 속 배터리 용량 잔량(81%)에 맞게 게이지 폭 조절 */
+            width: 81%; 
             height: 100%;
             background-color: #000000;
             border-radius: 1px;
@@ -217,16 +220,15 @@
     <!-- 갤럭시 스타일 스마트폰 프레임 -->
     <div class="phone-frame">
         
-        <!-- 상단 상태 바 -->
+       <!-- 상단 상태 바 (시간 변경, LTE 삭제, 배터리 위치 정렬 반영) -->
         <div class="status-bar">
-            <span class="status-time">11:43</span>
+            <span class="status-time">오후 5:02</span>
             <div class="status-right">
-                <span>LTE</span>
+                <span>81%</span>
                 <div class="battery-icon">
                     <div class="battery-level"></div>
                     <div class="battery-tip"></div>
                 </div>
-                <span>82%</span>
             </div>
         </div>
 
