@@ -1,1 +1,525 @@
-
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴대폰 캘린더</title>
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            -webkit-user-select: none;
+            user-select: none;
+        } 
+        body { 
+            background-color: #1a1a1a; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            color: #222222; 
+            overflow: hidden; 
+        } 
+        /* 갤럭시 스타일 스마트폰 프레임 */ 
+        .phone-frame { 
+            width: 100%; 
+            max-width: 412px; 
+            height: 720px; 
+            background-color: #ffffff; 
+            position: relative; 
+            border-radius: 40px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
+            border: 12px solid #2d2d2d; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+        @media (max-width: 450px) { 
+            .phone-frame { 
+                border: none; 
+                border-radius: 0; 
+                height: 90dvh; 
+                max-height: 90dvh; 
+            } 
+        } 
+        /* 상단 상태 바 */ 
+        .status-bar { 
+            height: 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 0 24px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            z-index: 10; 
+            background-color: #ffffff;
+            color: #000000;
+        } 
+        .status-right { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        } 
+        .battery-icon { 
+            width: 22px; 
+            height: 12px; 
+            border: 1px solid #000000; 
+            border-radius: 3px; 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            padding: 1px; 
+        } 
+        .battery-level { 
+            width: 81%; 
+            height: 100%; 
+            background-color: #000000; 
+            border-radius: 1px; 
+        } 
+        .battery-tip { 
+            width: 2px; 
+            height: 4px; 
+            background-color: #000000; 
+            position: absolute; 
+            right: -3px; 
+            border-radius: 0 1px 1px 0; 
+        }
+        /* 캘린더 헤더 영역 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #ffffff;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .menu-btn {
+            font-size: 24px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #000000;
+            display: flex;
+            align-items: center;
+        }
+        .current-month {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000000;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .icon-btn {
+            font-size: 20px;
+            color: #000000;
+            font-weight: bold;
+        }
+        .today-icon {
+            border: 2px solid #000000;
+            border-radius: 6px;
+            padding: 1px 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        /* 요일 헤더 세로줄 정렬 전용 */
+        .weekdays-row {
+            display: flex;
+            background-color: #ffffff;
+            padding: 15px 0 10px 0;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .week-number-space {
+            width: 40px;
+            flex-shrink: 0;
+        }
+        .weekdays-days {
+            display: flex;
+            flex-grow: 1;
+        }
+        .weekday {
+            flex: 1;
+        }
+        .weekday.sun { color: #d9383a; }
+        .weekday.sat { color: #4a90e2; }
+        .weekday.normal { color: #666666; }
+        /* 달력 메인 본문 슬라이드 틀 */
+        .calendar-body-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+        .calendar-grid {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            transition: transform 0.3s ease-out;
+        }
+        /* 달력의 각 주(Row) 배치 */
+        .calendar-row {
+            display: flex;
+            flex: 1;
+            border-bottom: 1px solid #f5f5f5;
+            min-height: 0;
+        }
+        .week-number {
+            width: 40px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 6px;
+            font-size: 12px;
+            color: #999999;
+        }
+        .days-container {
+            display: flex;
+            flex-grow: 1;
+        }
+        /* 개별 날짜 칸 스타일 */
+        .day-cell {
+            flex: 1;
+            border-right: 1px solid #fbfbfb;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 4px;
+            min-width: 0;
+        }
+        .day-cell:last-child {
+            border-right: none;
+        }
+        .day-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 32px;
+            justify-content: center;
+        }
+        .day-num {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333333;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* 오늘 날짜 (10월 19일 강조 표시) */
+        .day-cell.today .day-num {
+            background-color: #000000;
+            color: #ffffff;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        .lunar-date {
+            font-size: 10px;
+            color: #b5b5b5;
+            margin-top: -2px;
+        }
+        .day-cell.sun .day-num, .day-cell.holiday .day-num { color: #d9383a; }
+        .day-cell.sat .day-num { color: #4a90e2; }
+        .day-cell.other-month { opacity: 0.25; }
+        /* 일정 탭 바 스타일 */
+        .events-container {
+            width: 100%;
+            margin-top: 2px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 0 1px;
+        }
+        .event-bar {
+            font-size: 10px;
+            padding: 2px 4px;
+            color: white;
+            border-radius: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            text-align: center;
+            font-weight: 500;
+            height: 16px;
+            line-height: 12px;
+        }
+        /* 각 일정 테마별 색상 기입 */
+        .event-pink { background-color: #ff8fa3; }
+        .event-red { background-color: #f25c5c; }
+        .event-blue { background-color: #4ea8de; }
+        .event-mint { background-color: #72efdd; color: #222222; }
+        /* 하단 고정 등록 버튼 */
+        .calendar-footer {
+            height: 70px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-top: 1px solid #f0f0f0;
+        }
+        .footer-info-tag {
+            position: absolute;
+            left: 24px;
+            background-color: #f5f5f5;
+            color: #666666;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+        .add-btn {
+            position: absolute;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #333333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <!-- 상단 상태 바 -->
+        <div class="status-bar">
+            <div class="status-left" id="live-time">20:25</div>
+            <div class="status-right">
+                <span>📶</span>
+                <div class="battery-icon">
+                    <div class="battery-level"></div>
+                    <div class="battery-tip"></div>
+                </div>
+            </div>
+        </div>
+        <!-- 캘린더 상단 헤더 -->
+        <div class="calendar-header">
+            <div class="header-left">
+                <!-- 누르면 home.html로 이동하는 ≡ 버튼 -->
+                <a href="home.html" class="menu-btn">≡</a>
+                <div class="current-month" id="calendar-month-txt">10월</div>
+            </div>
+            <div class="header-right">
+                <span class="icon-btn">🔍</span>
+                <span class="icon-btn today-icon">19</span>
+            </div>
+        </div>
+ <!-- 요일 표시줄 (가로 폭 및 세로선 정렬 최적화) -->
+        <div class="weekdays-row">
+            <div class="week-number-space"></div>
+            <div class="weekdays-days">
+                <div class="weekday sun">일</div>
+                <div class="weekday normal">월</div>
+                <div class="weekday normal">화</div>
+                <div class="weekday normal">수</div>
+                <div class="weekday normal">목</div>
+                <div class="weekday normal">금</div>
+                <div class="weekday sat">토</div>
+            </div>
+        </div>
+        <!-- 달력 메인 컨테이너 영역 -->
+        <div class="calendar-body-container" id="swipe-area">
+            <div class="calendar-grid" id="calendar-grid-box">
+                <!-- 자바스크립트를 통해 주차 및 날짜 셀이 동적으로 자동 생성됩니다 -->
+            </div>
+        </div>
+        <!-- 하단 고정 바 -->
+        <div class="calendar-footer">
+            <div class="footer-info-tag">10월 6일에 추가</div>
+            <div class="add-btn">+</div>
+        </div>
+    </div>
+    <script>
+        // 현재 상태 변수 설정 (기본값: 2026년 10월)
+        let currentYear = 2026;
+        let currentMonth = 9; // 0부터 시작하므로 9는 10월을 의미합니다.
+        // 음력 표기 및 국가 공휴일 고정 데이터셋
+        const dayMetadata = {
+            "2026-10-03": { isHoliday: true, holidayName: "개천절" },
+            "2026-10-05": { holidayName: "대체공휴일" },
+            "2026-10-09": { isHoliday: true, holidayName: "한글날" },
+            "2026-09-27": { lunar: "8.17" },
+            "2026-10-04": { lunar: "8.24" },
+            "2026-10-06": { lunar: "8.26" },
+            "2026-10-11": { lunar: "9.1" },
+            "2026-10-18": { lunar: "9.8" },
+            "2026-10-25": { lunar: "9.15" }
+        };
+        // 요청하신 2026년 10월 스케줄 데이터 정의
+        const fixedEvents = [
+            { start: "2026-10-04", end: "2026-10-05", text: "덩이랑 부산 여행", color: "event-pink" },
+            { start: "2026-10-08", end: "2026-10-08", text: "7주년 ♥", color: "event-pink" },
+            { start: "2026-10-10", end: "2026-10-10", text: "데이트", color: "event-pink" },
+            { start: "2026-10-13", end: "2026-10-13", text: "김교수님 면담", color: "event-blue" },
+            { start: "2026-10-14", end: "2026-10-14", text: "심사용 논문 초안 제출", color: "event-blue" },
+            { start: "2026-10-16", end: "2026-10-16", text: "신청 마감일", color: "event-mint" },
+            { start: "2026-10-19", end: "2026-10-19", text: "구구타 정기 결제", color: "event-blue" },
+            { start: "2026-10-21", end: "2026-10-27", text: "성민이 중간고사", color: "event-red" },
+            { start: "2026-10-30", end: "2026-10-30", text: "데이트", color: "event-pink" }
+        ];
+        // 캘린더 연간 주차(Week of Year) 계산 로직
+        function getWeekOfYear(date) {
+            const target = new Date(date.valueOf());
+            const dayNr = (date.getDay() + 6) % 7;
+            target.setDate(target.getDate() - dayNr + 3);
+            const firstThursday = target.valueOf();
+            target.setMonth(0, 1);
+            if (target.getDay() !== 4) {
+                target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+            }
+            return 1 + Math.ceil((firstThursday - target) / 604800000);
+        }
+        // 달력 화면 그리드 동적 생성 함수
+        function renderCalendar(year, month) {
+            // 헤더의 월 표시 갱신
+            document.getElementById("calendar-month-txt").innerText = `${month + 1}월`;
+            
+            const gridBox = document.getElementById("calendar-grid-box");
+            gridBox.innerHTML = "";
+            // 달력 첫 주 일요일 날짜 판정 구하기
+            const firstDayOfMonth = new Date(year, month, 1);
+            const startOffset = firstDayOfMonth.getDay();
+            const startDate = new Date(year, month, 1 - startOffset);
+            // 5주 스크린 배치 루프
+            for (let w = 0; w < 5; w++) {
+                const rowObj = document.createElement("div");
+                rowObj.className = "calendar-row";
+                // 해당 주차 연동 연산 및 레이블 지정
+                const currentWeekDate = new Date(startDate);
+                currentWeekDate.setDate(startDate.getDate() + w * 7);
+                const weekNumText = getWeekOfYear(currentWeekDate);
+                const weekNumDiv = document.createElement("div");
+                weekNumDiv.className = "week-number";
+                weekNumDiv.innerText = weekNumText;
+                rowObj.appendChild(weekNumDiv);
+                // 일주일 7일 배치 레이아웃
+                const daysContainer = document.createElement("div");
+                daysContainer.className = "days-container";
+                for (let d = 0; d < 7; d++) {
+                    const thisDate = new Date(startDate);
+                    thisDate.setDate(startDate.getDate() + (w * 7 + d));
+                    const dateStr = `${thisDate.getFullYear()}-${String(thisDate.getMonth()+1).padStart(2,'0')}-${String(thisDate.getDate()).padStart(2,'0')}`;
+                    const dayCell = document.createElement("div");
+                    dayCell.className = "day-cell";
+                    // 주말 여부 클래스 추가
+                    if (d === 0) dayCell.classList.add("sun");
+                    if (d === 6) dayCell.classList.add("sat");
+                    // 타 월 데이터 흐리게 조정
+                    if (thisDate.getMonth() !== month) {
+                        dayCell.classList.add("other-month");
+                    }
+                    // 10월 19일 검은색 원형 강조 마크 처리
+                    if (thisDate.getFullYear() === 2026 && thisDate.getMonth() === 9 && thisDate.getDate() === 19) {
+                        dayCell.classList.add("today");
+                    }
+                    // 상단 레이블 영역 (날짜 + 음력/공휴일명)
+                    const dayTop = document.createElement("div");
+                    dayTop.className = "day-top";
+                    const dayNum = document.createElement("div");
+                    dayNum.className = "day-num";
+                    dayNum.innerText = thisDate.getDate();
+                    dayTop.appendChild(dayNum);
+                    // 메타데이터 매핑 검증 기입
+                    if (dayMetadata[dateStr]) {
+                        const meta = dayMetadata[dateStr];
+                        if (meta.isHoliday) dayCell.classList.add("holiday");
+                        
+                        if (meta.holidayName || meta.lunar) {
+                            const infoLabel = document.createElement("div");
+                            infoLabel.className = "lunar-date";
+                            infoLabel.innerText = meta.holidayName || meta.lunar;
+                            dayTop.appendChild(infoLabel);
+                        }
+                    }
+                    dayCell.appendChild(dayTop);
+                    // 스케줄 바를 담을 하단 컨테이너
+                    const eventsContainer = document.createElement("div");
+                    eventsContainer.className = "events-container";
+                    // 고정 스케줄 매칭 후 바 차트 바인딩
+                    fixedEvents.forEach(ev => {
+                        if (dateStr >= ev.start && dateStr <= ev.end) {
+                            const evBar = document.createElement("div");
+                            evBar.className = `event-bar ${ev.color}`;
+                            
+                            // 다일 일정의 첫날이거나, 주가 바뀌는 첫 일요일이거나, 월이 바뀌는 1일일 때만 텍스트를 노출하여 가독성을 높입니다.
+                            if (dateStr === ev.start || d === 0 || thisDate.getDate() === 1) {
+                                evBar.innerText = ev.text;
+                            }
+                            eventsContainer.appendChild(evBar);
+                        }
+                    });
+                    dayCell.appendChild(eventsContainer);
+                    daysContainer.appendChild(dayCell);
+                }
+                rowObj.appendChild(daysContainer);
+                gridBox.appendChild(rowObj);
+            }
+        }
+        // 모바일 터치 스와이프 및 마우스 드래그 액션 바인딩
+        const swipeArea = document.getElementById("swipe-area");
+        let startX = 0;
+        let startY = 0;
+        swipeArea.addEventListener("touchstart", (e) => {
+            startX = e.touches.clientX;
+            startY = e.touches.clientY;
+        }, { passive: true });
+        swipeArea.addEventListener("touchend", (e) => {
+            const diffX = e.changedTouches.clientX - startX;
+            const diffY = e.changedTouches.clientY - startY;
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                if (diffX > 0) {
+                    currentMonth--;
+                    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+                } else {
+                    currentMonth++;
+                    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+                }
+                renderCalendar(currentYear, currentMonth);
+            }
+        }, { passive: true });
+        // PC 테스트 브라우저 환경 마우스 이벤트 보완
+        swipeArea.addEventListener("mousedown", (e) => {
+            startX = e.clientX;
+            startY = e.clientY;
+        });
+        swipeArea.addEventListener("mouseup", (e) => {
+            const diffX = e.clientX - startX;
+            const diffY = e.clientY - startY;
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                if (diffX > 0) {
+                    currentMonth--;
+                    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+                } else {
+                    currentMonth++;
+                    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+                }
+                renderCalendar(currentYear, currentMonth);
+            }
+        });
+        // 초기 화면 구동 렌더링 함수 실행
+        renderCalendar(currentYear, currentMonth);
+    </script>
+</body>
+</html>
