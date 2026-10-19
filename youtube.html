@@ -1,1 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴대폰 - YouTube</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        /* 갤럭시 스타일 스마트폰 프레임 (반응형 외곽 틀) */
+        .phone-frame {
+            width: 100%;
+            max-width: 412px;
+            height: 720px; 
+            background-color: #0f0f0f; /* 유튜브 모바일 앱 다크모드 배경색 */
+            position: relative;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 12px solid #2d2d2d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
+        /* 모바일 기기 특수 규칙 */
+        @media (max-width: 450px) {
+            .phone-frame {
+                border: none;
+                border-radius: 0;
+                height: 90dvh; 
+                max-height: 90dvh; 
+            }
+        }
+
+        /* 상단 상태 바 (인덱스/카톡 스타일 동기화: 흰색 폰트 및 게이지 변경) */
+        .status-bar {
+            height: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: 500;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 20;
+            color: #ffffff;
+        }
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .battery-icon {
+            width: 22px;
+            height: 12px;
+            border: 1px solid #ffffff;
+            border-radius: 3px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 1px;
+            justify-content: flex-start;
+        }
+        .battery-level {
+            width: 81%;
+            height: 100%;
+            background-color: #ffffff;
+            border-radius: 1px;
+        }
+        .battery-tip {
+            width: 2px;
+            height: 4px;
+            background-color: #ffffff;
+            position: absolute;
+            right: -3px;
+            border-radius: 0 1px 1px 0;
+        }
+
+        /* 유튜브 앱 상단 메뉴바 (로고, 종 모양 알림, 돋보기) */
+        .youtube-header {
+            height: 50px;
+            margin-top: 40px; /* 상태바 공간 확보 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            background-color: #0f0f0f;
+            z-index: 10;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            cursor: pointer;
+        }
+        .logo-icon {
+            color: #ff0000;
+            font-size: 22px;
+        }
+        .header-icon-group {
+            display: flex;
+            gap: 18px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* [핵심 수정] 중간 영상 콘텐츠 피드 영역 (독립 스크롤 활성화) */
+        .video-feed-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 0 10px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* 우측 슬림 세로 스크롤바 디자인 정의 */
+        .video-feed-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        .video-feed-area::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        /* 개별 유튜브 영상 카드 컴포넌트 */
+        .video-card {
+            width: 100%;
+            margin-bottom: 24px;
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+        .thumbnail-box {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #222222;
+            overflow: hidden;
+            position: relative;
+        }
+        .thumbnail-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 영상 상세 정보 레이아웃 (프로필 + 타이틀 그룹) */
+        .video-details {
+            display: flex;
+            padding: 12px 14px 0 14px;
+            gap: 12px;
+        }
+        .channel-profile {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #333333;
+            flex-shrink: 0;
+        }
+        .channel-profile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .text-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+        .video-title {
+            font-size: 14px;
+            font-weight: 700; /* 영상 제목 굵은 글씨 */
+            line-height: 1.3;
+            color: #f1f1f1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* 두 줄 이상 줄바꿈 말줄임 */
+            -webkit-box-orient: vertical;
+        }
+        .video-metadata {
+            font-size: 12px;
+            color: #aaaaaa; /* 작은 글씨 및 연한 회색 조합 */
+        }
+
+        /* 유튜브 하단 앱 탭바 */
+        .youtube-footer-nav {
+            height: 60px;
+            background-color: #0f0f0f;
+            border-top: 1px solid #222222;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 6px;
+            z-index: 10;
+        }
+        .footer-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #aaaaaa;
+            cursor: pointer;
+            flex: 1;
+            height: 100%;
+        }
+        .footer-item .icon-slot {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+        /* 현재 활성화된 홈 버튼 디자인 셋업 */
+        .footer-item.active {
+            color: #ffffff;
+            font-weight: bold;
+        }
+        /* 더하기(+) 버튼 고유 원형 템플릿 */
+        .plus-btn {
+            font-size: 26px !important;
+            font-weight: 300;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 갤럭시 스타일 스마트폰 프레임 -->
+    <div class="phone-frame">
+        
+        <!-- 상단 고정 상태 바 -->
+        <div class="status-bar">
+            <span class="status-time">오후 5:02</span>
+            <div class="status-right">
+                <span>81%</span>
+                <div class="battery-icon">
+                    <div class="battery-level"></div>
+                    <div class="battery-tip"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 유튜브 헤더 영역 -->
+        <header class="youtube-header">
+            <div class="logo-area">
+                <span class="logo-icon">▶</span>
+                <span>YouTube</span>
+            </div>
+            <div class="header-icon-group">
+                <span>🔔</span> <!-- 알림 배지 없이 종 모양만 깔끔하게 유지 -->
+                <span>🔍</span>
+            </div>
+        </header>
+
+        <!-- [독립 모션 구동] 중간 영상 피드 스크롤 스크린 구역 -->
+        <main class="video-feed-area">
+            
+            <!-- 1. 방콕 브이로그 -->
+            <a href="https://youtu.be/5m6XB33_gIQ?si=cw0I_IfLrY6aYf2Y" class="video-card">
+                <div class="thumbnail-box">
+                    <img src="btlog1.jpg" alt="썸네일" onerror="this.style.backgroundColor='#2a2a2a';">
+                </div>
+                <div class="video-details">
+                    <div class="channel-profile">
+                        <img src="btyoutube.png" alt="채널" onerror="this.style.backgroundColor='#444444';">
+                    </div>
+                    <div class="text-group">
+                        <span class="video-title">[덩구로그] 방콕 브이로그</span>
+                        <span class="video-metadata">덩구+ • 재생수 23만회</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 2. 홍콩 브이로그 -->
+            <a href="https://youtu.be/J5TOPIN4S0w?si=41fO6dXxXxlF9lzc" class="video-card">
+                <div class="thumbnail-box">
+                    <img src="btlog2.jpg" alt="썸네일" onerror="this.style.backgroundColor='#2a2a2a';">
+                </div>
+                <div class="video-details">
+                    <div class="channel-profile">
+                        <img src="btyoutube.png" alt="채널" onerror="this.style.backgroundColor='#444444';">
+                    </div>
+                    <div class="text-group">
+                        <span class="video-title">[덩구로그] 홍콩 브이로그</span>
+                        <span class="video-metadata">덩구+ • 재생수 20만회</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 3. 오사카 브이로그 -->
+            <a href="https://youtu.be/1RoGC3-4KZA?si=6Gs9svX-rmq1y_lL" class="video-card">
+                <div class="thumbnail-box">
+                    <img src="jmlog.jpg" alt="썸네일" onerror="this.style.backgroundColor='#2a2a2a';">
+                </div>
+                <div class="video-details">
+                    <div class="channel-profile">
+                        <img src="btyoutube.png" alt="채널" onerror="this.style.backgroundColor='#444444';">
+                    </div>
+                    <div class="text-group">
+                        <span class="video-title">[브이로쿠] 정모의 오사카 브이로그</span>
+                        <span class="video-metadata">덩구+ • 재생수 25만회</span>
+                    </div>
+                </div>
+            </a>
+
+   <!-- 4. 성민이의 먹방로그 -->
+            <a href="https://youtu.be" class="video-card">
+                <div class="thumbnail-box">
+                    <img src="smlog.jpg" alt="썸네일" onerror="this.style.backgroundColor='#2a2a2a';">
+                </div>
+                <div class="video-details">
+                    <div class="channel-profile">
+                        <img src="btyoutube.png" alt="채널" onerror="this.style.backgroundColor='#444444';">
+                    </div>
+                    <div class="text-group">
+                        <span class="video-title">[덩로그] 성민이의 먹방로그</span>
+                        <span class="video-metadata">덩구+ • 재생수 18만회</span>
+                    </div>
+                </div>
+            </a>
+
+        </main>
+
+        <!-- 유튜브 하단 앱 탭바 (홈 활성화 및 내 페이지 사람 아이콘 적용) -->
+        <nav class="youtube-footer-nav">
+            <div class="footer-item active">
+                <span class="icon-slot">🏠</span>
+                <span>홈</span>
+            </div>
+            <div class="footer-item">
+                <span class="icon-slot">🎬</span>
+                <span>Shorts</span>
+            </div>
+            <div class="footer-item">
+                <span class="icon-slot plus-btn">➕</span>
+            </div>
+            <div class="footer-item">
+                <span class="icon-slot">📺</span>
+                <span>구독</span>
+            </div>
+            <div class="footer-item">
+                <span class="icon-slot">👤</span>
+                <span>내 페이지</span>
+            </div>
+        </nav>
+
+    </div>
+
+</body>
+</html>
