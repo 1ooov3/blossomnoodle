@@ -1,1 +1,662 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전화</title>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: #1a1a1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+/* ===== 스마트폰 프레임 (기존 초기설정과 동일) ===== */
+.phone-frame {
+  width: 100%;
+  max-width: 412px;
+  /* 컴퓨터 화면에서 가로 412px, 세로 720px 고정 */
+  height: 720px;
+  background-color: #000000;
+  position: relative;
+  border-radius: 40px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 12px solid #2d2d2d;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 모바일 기기(화면 폭 450px 이하) */
+@media (max-width: 450px) {
+  .phone-frame {
+    border: none;
+    border-radius: 0;
+    height: 90dvh;
+    max-height: 90dvh;
+  }
+}
+
+/* 상단 상태 바 */
+.status-bar {
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10;
+}
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-right svg { display: block; }
+.lte { font-size: 10px; font-weight: 700; }
+.battery-icon {
+  width: 22px;
+  height: 12px;
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 1px;
+}
+.battery-level {
+  width: 81%;
+  height: 100%;
+  background-color: #ffffff;
+  border-radius: 1px;
+}
+.battery-tip {
+  width: 2px;
+  height: 4px;
+  background-color: #ffffff;
+  position: absolute;
+  right: -3px;
+  border-radius: 0 1px 1px 0;
+}
+
+/* ===== 폰 화면 영역 (틀 안에서 이 영역만 바뀜) ===== */
+.screen {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: #f6f0f2;
+  color: #2b2328;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tab {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+}
+.tab.active { display: flex; }
+
+/* 스크롤 영역: 이 구역만 스크롤됨 */
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 14px 104px;
+  scrollbar-width: none;
+}
+.scroll::-webkit-scrollbar { display: none; }
+
+/* 공통 헤더 */
+.header { padding: 26px 0 6px; text-align: center; }
+.header h1 { font-size: 27px; font-weight: 500; color: #7a1432; letter-spacing: 1px; }
+.header .sub { margin-top: 6px; font-size: 12px; color: #a0707f; }
+.tools { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 10px 0 8px; }
+.tool-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; position: relative; }
+.tool-btn svg { width: 22px; height: 22px; fill: #7a1432; }
+.tool-btn .dot { position: absolute; top: 5px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: #e8601c; }
+
+/* 카드/라벨 */
+.label { font-size: 12px; color: #8d6a77; margin: 14px 6px 6px; }
+.card { background: #ffffff; border-radius: 22px; overflow: hidden; }
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 18px;
+  min-height: 56px;
+}
+.row + .row { border-top: 1px solid #f3eaee; }
+.row.callable { cursor: pointer; }
+.row.callable:active { background: #f6ecf0; }
+
+/* ===== 최근기록 ===== */
+.r-name { font-size: 16px; font-weight: 500; color: #2b2328; }
+.r-name.missed { color: #d4264a; }
+.r-sub { margin-top: 3px; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8d7c84; }
+.r-sub.missed { color: #d4264a; }
+.r-sub svg { width: 14px; height: 14px; fill: currentColor; }
+.r-time { font-size: 12px; color: #8d7c84; }
+
+/* ===== 연락처 ===== */
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: #fff; margin-right: 14px; flex-shrink: 0;
+}
+.c-left { display: flex; align-items: center; }
+.c-name { font-size: 16px; color: #2b2328; }
+.fav-head { cursor: pointer; }
+.fav-head .avatar { background: #f5a024; }
+.fav-head .avatar svg { width: 22px; height: 22px; fill: #fff; }
+.chev { width: 22px; height: 22px; fill: #a0707f; transition: transform .2s; }
+.fav-head.open .chev { transform: rotate(180deg); }
+.fav-body { display: none; border-top: 1px solid #f3eaee; }
+.fav-body.open { display: block; }
+
+/* ===== 키패드 ===== */
+.dial-top { display: flex; justify-content: flex-end; padding: 22px 14px 0; gap: 4px; }
+.dial-number-wrap { flex: 1; min-height: 0; display: flex; align-items: flex-end; justify-content: center; padding: 0 24px 22px; }
+.dial-number { font-size: 38px; font-weight: 400; color: #2b2328; letter-spacing: 1px; min-height: 46px; max-width: 100%; overflow: hidden; white-space: nowrap; }
+.dial-number.small { font-size: 28px; }
+.keys { display: grid; grid-template-columns: repeat(3, 1fr); padding: 0 22px; }
+.key {
+  height: 62px; border: none; background: transparent; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 28px;
+}
+.key:active { background: rgba(122, 20, 50, 0.08); }
+.key .num { font-size: 30px; line-height: 1; color: #1d1519; font-weight: 400; }
+.key .sub { margin-top: 3px; font-size: 10px; line-height: 1.15; color: #7d6e75; text-align: center; min-height: 12px; }
+.key.hash .num { color: #3b6fd0; }
+.call-row { position: relative; display: flex; justify-content: center; align-items: center; padding: 14px 0 100px; }
+.call-btn {
+  width: 62px; height: 62px; border-radius: 50%; border: none; background: #f48ca3; cursor: pointer;
+  position: relative; display: flex; align-items: center; justify-content: center;
+}
+.call-btn:active { background: #ee7b95; }
+.call-btn svg { width: 30px; height: 30px; fill: #fff; }
+.call-btn .hd { position: absolute; top: 15px; right: 11px; font-size: 10px; font-weight: 800; color: #fff; }
+.back-btn {
+  position: absolute; right: 18%; top: 28px; width: 44px; height: 44px; border: none; background: transparent;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; visibility: hidden;
+}
+.back-btn.show { visibility: visible; }
+.back-btn svg { width: 26px; height: 26px; fill: #7a1432; }
+
+/* ===== 하단 탭 (알약 모양) ===== */
+.nav-pill {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+  width: calc(100% - 44px); max-width: 340px; height: 62px;
+  background: rgba(255, 255, 255, 0.94); border-radius: 34px;
+  box-shadow: 0 2px 12px rgba(80, 30, 50, 0.14);
+  display: flex; align-items: center; padding: 5px; gap: 4px; z-index: 5;
+}
+.nav-item {
+  flex: 1; height: 100%; border: none; background: transparent; border-radius: 28px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  color: #a4677c; font-size: 11px;
+}
+.nav-item svg { width: 24px; height: 24px; fill: currentColor; }
+.nav-item.active { background: #e0dddf; color: #8a1238; font-weight: 700; }
+
+/* ===== 통화 화면 ===== */
+.call-screen {
+  position: absolute; inset: 0; z-index: 20;
+  background: linear-gradient(180deg, #2a3248 0%, #151a28 55%, #0d1018 100%);
+  color: #fff; display: none; flex-direction: column; align-items: center;
+}
+.call-screen.show { display: flex; animation: callIn .25s ease; }
+@keyframes callIn { from { opacity: 0; } to { opacity: 1; } }
+
+.call-top { margin-top: 34px; text-align: center; }
+.call-time { font-size: 16px; color: #c4c9d6; font-variant-numeric: tabular-nums; min-height: 22px; letter-spacing: 1px; }
+.call-name { margin-top: 8px; font-size: 34px; font-weight: 500; }
+
+.speech { flex: 1; width: 100%; padding: 0 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.speech .who { font-size: 14px; font-weight: 700; color: #7f869a; margin-bottom: 8px; opacity: 0; transition: opacity .3s; }
+.speech .who.show { opacity: 1; }
+.speech .said { font-size: 22px; font-weight: 700; color: #e9ecf4; line-height: 1.45; word-break: keep-all; min-height: 64px; }
+
+.call-actions { display: flex; gap: 22px; margin-bottom: 26px; }
+.act { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #fff; cursor: pointer; border: none; background: transparent; }
+.act .circle { width: 68px; height: 68px; border-radius: 50%; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; transition: background .15s; }
+.act .circle svg { width: 28px; height: 28px; fill: #fff; transition: fill .15s; }
+.act.on .circle { background: #ffffff; }
+.act.on .circle svg { fill: #1b2030; }
+
+.end-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 30px; font-size: 12px; font-weight: 600; }
+.end-btn { width: 76px; height: 76px; border-radius: 50%; border: none; background: #f4443f; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.end-btn:active { background: #dc3631; }
+.end-btn svg { width: 36px; height: 36px; fill: #fff; }
+
+.dots::after { content: ''; animation: dots 1.2s steps(4, end) infinite; }
+@keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+
+  <!-- 상단 상태 바 (시간 오후 5:02 / 배터리 81%) -->
+  <div class="status-bar">
+    <span class="status-time">오후 5:02</span>
+    <div class="status-right">
+      <span class="lte">LTE</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+      <svg width="14" height="13" viewBox="0 0 14 13" fill="#fff"><rect x="0" y="8" width="2.5" height="5" rx=".5"/><rect x="4" y="5.5" width="2.5" height="7.5" rx=".5"/><rect x="8" y="3" width="2.5" height="10" rx=".5"/><rect x="12" y="0" width="2" height="13" rx=".5"/></svg>
+      <span>81%</span>
+      <div class="battery-icon"><div class="battery-level"></div><div class="battery-tip"></div></div>
+    </div>
+  </div>
+
+  <!-- 화면 영역 -->
+  <div class="screen" id="screen">
+
+    <!-- 최근기록 탭 (첫 화면) -->
+    <section class="tab active" id="tab-recents">
+      <div class="scroll">
+        <div class="header"><h1>전화</h1></div>
+        <div class="tools">
+          <div class="tool-btn"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></div>
+          <div class="tool-btn"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg><span class="dot"></span></div>
+        </div>
+        <div id="recentsList"></div>
+      </div>
+    </section>
+
+    <!-- 연락처 탭 -->
+    <section class="tab" id="tab-contacts">
+      <div class="scroll">
+        <div class="header">
+          <h1>전화</h1>
+          <div class="sub">전화번호가 저장된 연락처 13명</div>
+        </div>
+        <div class="tools">
+          <div class="tool-btn"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></div>
+          <div class="tool-btn"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></div>
+          <div class="tool-btn"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg><span class="dot"></span></div>
+        </div>
+
+        <!-- 즐겨찾는 연락처 -->
+        <div class="card">
+          <div class="row fav-head" id="favHead">
+            <div class="c-left">
+              <div class="avatar"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+              <span class="c-name">즐겨찾는 연락처</span>
+            </div>
+            <svg class="chev" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+          </div>
+          <div class="fav-body" id="favBody">
+            <div class="row callable" data-call="contacts">
+              <div class="c-left"><div class="avatar" style="background:#f06a8e">덩</div><span class="c-name">덩이♥</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 내 프로필 -->
+        <div class="label">내 프로필</div>
+        <div class="card">
+          <div class="row">
+            <div class="c-left"><div class="avatar" style="background:#e58aa8">구</div><span class="c-name">구정모</span></div>
+          </div>
+        </div>
+
+        <div id="contactList"></div>
+      </div>
+    </section>
+
+    <!-- 키패드 탭 (스크롤 없음) -->
+    <section class="tab" id="tab-keypad">
+      <div class="dial-top">
+        <div class="tool-btn"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></div>
+        <div class="tool-btn"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg><span class="dot"></span></div>
+      </div>
+      <div class="dial-number-wrap"><div class="dial-number" id="dialNumber"></div></div>
+      <div class="keys" id="keys"></div>
+      <div class="call-row">
+        <button class="call-btn" id="dialCall" aria-label="전화 걸기">
+          <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          <span class="hd">HD</span>
+        </button>
+        <button class="back-btn" id="dialBack" aria-label="지우기">
+          <svg viewBox="0 0 24 24"><path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- 하단 탭 -->
+    <nav class="nav-pill">
+      <button class="nav-item" data-tab="keypad">
+        <svg viewBox="0 0 24 24"><path d="M12 19c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zM6 1c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm12-8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-6 8c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm6 0c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0-6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-6 0c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0-6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/></svg>
+        키패드
+      </button>
+      <button class="nav-item active" data-tab="recents">
+        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        최근기록
+      </button>
+      <button class="nav-item" data-tab="contacts">
+        <svg viewBox="0 0 24 24"><path d="M12 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2m0 9c2.7 0 5.8 1.29 6 2v1H6v-1c.2-.71 3.3-2 6-2M12 4C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 9c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/></svg>
+        연락처
+      </button>
+    </nav>
+
+    <!-- 통화 화면 -->
+    <div class="call-screen" id="callScreen">
+      <div class="call-top">
+        <div class="call-time" id="callTime"></div>
+        <div class="call-name">덩이♥</div>
+      </div>
+
+      <div class="speech">
+        <div class="who" id="speechWho">덩이♥</div>
+        <div class="said" id="speechText"></div>
+      </div>
+
+      <div class="call-actions">
+        <button class="act" data-toggle>
+          <span class="circle"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></span>
+          스피커
+        </button>
+        <button class="act" data-toggle>
+          <span class="circle"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg></span>
+          음소거
+        </button>
+        <button class="act" data-toggle>
+          <span class="circle"><svg viewBox="0 0 24 24"><path d="M12 19c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zM6 1c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm12-8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-6 8c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm6 0c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0-6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-6 0c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0-6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/></svg></span>
+          키패드
+        </button>
+      </div>
+
+      <div class="end-wrap">
+        <button class="end-btn" id="endBtn" aria-label="전화 끊기">
+          <svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
+        </button>
+        <span>종료</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ===================== 데이터 ===================== */
+  var ICONS = {
+    out:  'M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5z',
+    in:   'M20 5.41L18.59 4 7 15.59V9H5v10h10v-2H8.41z',
+    miss: 'M19.59 7L12 14.59 6.41 9H11V7H3v8h2v-4.59l7 7 9-9z'
+  };
+  var TYPE_LABEL = { out: '발신 전화', in: '수신 전화', miss: '부재중 전화' };
+
+  var RECENTS = [
+    { date: '10월 5일 월요일', items: [['out', '덩이♥', '오후 11:19'], ['in', '엄마', '오후 07:02']] },
+    { date: '10월 4일 일요일', items: [['out', '원진이', '오후 3:17'], ['miss', '원진이', '오후 1:44']] },
+    { date: '10월 3일 토요일', items: [['in', '070-****-****', '오후 4:18']] },
+    { date: '10월 1일 목요일', items: [['in', '세림이 형', '오후 7:13'], ['out', '덩이♥', '오전 10:34']] },
+    { date: '9월 29일 화요일', items: [['in', '형준이', '오후 4:26']] },
+    { date: '9월 28일 월요일', items: [['in', '김교수님', '오전 11:48']] },
+    { date: '9월 27일 일요일', items: [['out', '엄마', '오후 08:03'], ['out', '덩이♥', '오후 7:27']] },
+    { date: '9월 26일 토요일', items: [['in', '런이 형', '오후 5:24']] }
+  ];
+
+  var CONTACTS = ['박세림', '앨런', '서우빈', '함원진', '강민희', '송형준', '김태영', '엄마', '아빠', '할머니', '할아버지', '김교수님', '덩이♥'];
+  var AVATAR_COLORS = ['#5fb7c9', '#9a8bd6', '#e58aa8', '#6fb98f', '#e5a05a', '#7f9be0', '#c98bd0'];
+
+  var MENTS = {
+    1: ['형 언제 도착해애', '이제 출발했다고? 뛰어와!!!', '뽀뽀해주면 뛰어온다고?', '...집 가서 해줄게 얼른 와 나 추워'],
+    2: ['형 어디야', '뛰고 있는 거 맞아?', '숨소리가 안들리는데', '알겠어 믿어줄게 빨리오기나 해'],
+    3: ['왜 자꾸 전화해!!', '더 늦으면 집에 못 들어오게 할거야', '변명은 듣지 않도록 할게', '형 지금 진짜 추워 나 감기걸리면 책임질거야?', '오자마자 옷 벗어서 나 줘'],
+    4: ['형 뭐해', '형은 내 생각밖에 안 해?', '나도 그런데', '나도 내 생각밖에 안 해 ><'],
+    5: ['형 520이 무슨 뜻인지 알아?', '사랑해를 뜻하는 숫자코드래', '사실은...', '정말 많이 사랑해']
+  };
+
+  var LINE_MS = 3000;     // 한 줄당 시간
+  var RING_MS = 3000;     // 신호 가는 시간
+
+  /* ===================== 탭 전환 ===================== */
+  var tabs = { keypad: document.getElementById('tab-keypad'), recents: document.getElementById('tab-recents'), contacts: document.getElementById('tab-contacts') };
+  var navItems = document.querySelectorAll('.nav-item');
+
+  function showTab(name) {
+    Object.keys(tabs).forEach(function (k) { tabs[k].classList.toggle('active', k === name); });
+    navItems.forEach(function (b) { b.classList.toggle('active', b.dataset.tab === name); });
+  }
+  navItems.forEach(function (b) { b.addEventListener('click', function () { showTab(b.dataset.tab); }); });
+
+  /* ===================== 최근기록 렌더 ===================== */
+  var recentsHtml = '';
+  RECENTS.forEach(function (g) {
+    recentsHtml += '<div class="label">' + g.date + '</div><div class="card">';
+    g.items.forEach(function (it) {
+      var type = it[0], name = it[1], time = it[2];
+      var miss = type === 'miss';
+      var callable = name === '덩이♥';
+      recentsHtml +=
+        '<div class="row' + (callable ? ' callable' : '') + '"' + (callable ? ' data-call="recents"' : '') + '>' +
+          '<div>' +
+            '<div class="r-name' + (miss ? ' missed' : '') + '">' + name + '</div>' +
+            '<div class="r-sub' + (miss ? ' missed' : '') + '"><svg viewBox="0 0 24 24"><path d="' + ICONS[type] + '"/></svg>' + TYPE_LABEL[type] + '</div>' +
+          '</div>' +
+          '<div class="r-time">' + time + '</div>' +
+        '</div>';
+    });
+    recentsHtml += '</div>';
+  });
+  document.getElementById('recentsList').innerHTML = recentsHtml;
+
+  /* ===================== 연락처 렌더 (가나다순) ===================== */
+  var INITIALS = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  function initialOf(name) {
+    var c = name.charCodeAt(0) - 0xAC00;
+    if (c < 0 || c > 11171) return '#';
+    var ini = INITIALS[Math.floor(c / 588)];
+    var map = { 'ㄲ': 'ㄱ', 'ㄸ': 'ㄷ', 'ㅃ': 'ㅂ', 'ㅆ': 'ㅅ', 'ㅉ': 'ㅈ' };
+    return map[ini] || ini;
+  }
+  var sorted = CONTACTS.slice().sort(function (a, b) { return a.localeCompare(b, 'ko'); });
+  var groups = {}, order = [];
+  sorted.forEach(function (n) {
+    var k = initialOf(n);
+    if (!groups[k]) { groups[k] = []; order.push(k); }
+    groups[k].push(n);
+  });
+  var contactsHtml = '', ci = 0;
+  order.forEach(function (k) {
+    contactsHtml += '<div class="label">' + k + '</div><div class="card">';
+    groups[k].forEach(function (n) {
+      var callable = n === '덩이♥';
+      var color = callable ? '#f06a8e' : AVATAR_COLORS[ci % AVATAR_COLORS.length];
+      ci++;
+      contactsHtml +=
+        '<div class="row' + (callable ? ' callable' : '') + '"' + (callable ? ' data-call="contacts"' : '') + '>' +
+          '<div class="c-left"><div class="avatar" style="background:' + color + '">' + n.charAt(0) + '</div><span class="c-name">' + n + '</span></div>' +
+        '</div>';
+    });
+    contactsHtml += '</div>';
+  });
+  document.getElementById('contactList').innerHTML = contactsHtml;
+
+  /* 즐겨찾는 연락처 펼치기/접기 */
+  var favHead = document.getElementById('favHead');
+  var favBody = document.getElementById('favBody');
+  favHead.addEventListener('click', function () {
+    favHead.classList.toggle('open');
+    favBody.classList.toggle('open');
+  });
+
+  /* ===================== 키패드 ===================== */
+  var KEYS = [
+    ['1', ''], ['2', 'ABC'], ['3', 'DEF'],
+    ['4', 'ㄱㅋ<br>GHI'], ['5', 'ㄴㄹ<br>JKL'], ['6', 'ㄷㅌ<br>MNO'],
+    ['7', 'ㅂㅍ<br>PQRS'], ['8', 'ㅅㅎ<br>TUV'], ['9', 'ㅈㅊ<br>WXYZ'],
+    ['*', ''], ['0', 'ㅇㅁ<br>+'], ['#', '']
+  ];
+  var keysEl = document.getElementById('keys');
+  KEYS.forEach(function (k) {
+    var b = document.createElement('button');
+    b.className = 'key' + (k[0] === '#' ? ' hash' : '');
+    b.innerHTML = '<span class="num">' + k[0] + '</span><span class="sub">' + k[1] + '</span>';
+    b.addEventListener('click', function () { pressKey(k[0]); });
+    keysEl.appendChild(b);
+  });
+
+  var digits = '';
+  var dialNumber = document.getElementById('dialNumber');
+  var dialBack = document.getElementById('dialBack');
+  function renderDigits() {
+    dialNumber.textContent = digits;
+    dialNumber.classList.toggle('small', digits.length > 11);
+    dialBack.classList.toggle('show', digits.length > 0);
+  }
+  function pressKey(ch) {
+    if (digits.length >= 24) return;
+    digits += ch;
+    renderDigits();
+  }
+  dialBack.addEventListener('click', function () { digits = digits.slice(0, -1); renderDigits(); });
+  document.getElementById('dialCall').addEventListener('click', function () {
+    if (digits === '520') startCall('keypad');   // 그 외 번호는 아무 일도 일어나지 않음
+  });
+
+  /* ===================== 통화 ===================== */
+  var callScreen = document.getElementById('callScreen');
+  var callTime = document.getElementById('callTime');
+  var speechWho = document.getElementById('speechWho');
+  var speechText = document.getElementById('speechText');
+  var recentsCount = 0;   // 최근기록에서 덩이♥ 를 누를 때마다 멘트1→2→3→1… 순환
+  var call = null;
+
+  // 신호음 (한국식 컬러링 느낌의 440Hz + 480Hz)
+  var actx = null, tone = null;
+  function startTone() {
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+      var t = actx.currentTime;
+      var gain = actx.createGain();
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.setValueAtTime(0.06, t + 0.05);
+      gain.gain.setValueAtTime(0, t + 1.0);
+      gain.gain.setValueAtTime(0.06, t + 1.6);
+      gain.gain.setValueAtTime(0, t + 2.6);
+      gain.connect(actx.destination);
+      var o1 = actx.createOscillator(), o2 = actx.createOscillator();
+      o1.frequency.value = 440; o2.frequency.value = 480;
+      o1.connect(gain); o2.connect(gain);
+      o1.start(t); o2.start(t);
+      o1.stop(t + 3.2); o2.stop(t + 3.2);
+      tone = { o1: o1, o2: o2, gain: gain };
+    } catch (e) { tone = null; }
+  }
+  function stopTone() {
+    if (!tone) return;
+    try { tone.o1.stop(); tone.o2.stop(); } catch (e) {}
+    try { tone.gain.disconnect(); } catch (e) {}
+    tone = null;
+  }
+
+  function fmt(sec) {
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function typeLine(text) {
+    if (call.typer) clearInterval(call.typer);
+    var chars = Array.from(text), i = 0;
+    var delay = Math.min(110, 1800 / chars.length);
+    speechWho.classList.add('show');
+    speechText.textContent = '';
+    call.typer = setInterval(function () {
+      i++;
+      speechText.textContent = chars.slice(0, i).join('');
+      if (i >= chars.length) { clearInterval(call.typer); call.typer = null; }
+    }, delay);
+  }
+
+  function startCall(origin) {
+    if (call) return;
+    var lines;
+    if (origin === 'recents') { lines = MENTS[[1, 2, 3][recentsCount % 3]]; recentsCount++; }
+    else if (origin === 'contacts') { lines = MENTS[4]; }
+    else { lines = MENTS[5]; }
+
+    call = { origin: origin, timers: [], ticker: null, typer: null };
+
+    // 초기화
+    callTime.innerHTML = '<span class="dots">전화 거는 중</span>';
+    speechWho.classList.remove('show');
+    speechText.textContent = '';
+    callScreen.querySelectorAll('.act').forEach(function (a) { a.classList.remove('on'); });
+    callScreen.classList.add('show');
+    startTone();
+
+    // 3초 뒤 연결
+    call.timers.push(setTimeout(function () {
+      stopTone();
+      var t0 = Date.now();
+      callTime.textContent = fmt(0);
+      call.ticker = setInterval(function () {
+        callTime.textContent = fmt(Math.floor((Date.now() - t0) / 1000));
+      }, 250);
+
+      lines.forEach(function (line, i) {
+        call.timers.push(setTimeout(function () { typeLine(line); }, i * LINE_MS));
+      });
+      // 마지막 줄까지 다 뜬 뒤 자동 종료
+      call.timers.push(setTimeout(endCall, lines.length * LINE_MS));
+    }, RING_MS));
+  }
+
+  function endCall() {
+    if (!call) return;
+    var origin = call.origin;
+    call.timers.forEach(clearTimeout);
+    if (call.ticker) clearInterval(call.ticker);
+    if (call.typer) clearInterval(call.typer);
+    call = null;
+    stopTone();
+    callScreen.classList.remove('show');
+    if (origin === 'keypad') { digits = ''; renderDigits(); }
+    showTab(origin);   // 걸었던 탭으로 복귀
+  }
+
+  document.getElementById('endBtn').addEventListener('click', endCall);
+
+  // 통화 화면 토글 버튼: 색만 바뀌고 다른 기능 없음
+  callScreen.querySelectorAll('[data-toggle]').forEach(function (b) {
+    b.addEventListener('click', function () { b.classList.toggle('on'); });
+  });
+
+  // 덩이♥ 칸 클릭 → 발신
+  document.getElementById('screen').addEventListener('click', function (e) {
+    var el = e.target.closest('[data-call]');
+    if (el) startCall(el.dataset.call);
+  });
+
+  renderDigits();
+})();
+</script>
+</body>
+</html>
 
