@@ -35,7 +35,6 @@
             flex-direction: column;
             overflow: hidden;
         }
-
         /* 모바일 기기 특수 규칙 */
         @media (max-width: 450px) {
             .phone-frame {
@@ -45,7 +44,6 @@
                 max-height: 90dvh; 
             }
         }
-
         /* 상단 상태 바 (인덱스/카톡 스타일 동기화: 흰색 폰트 및 게이지 변경) */
         .status-bar {
             height: 40px;
@@ -91,7 +89,6 @@
             right: -3px;
             border-radius: 0 1px 1px 0;
         }
-
         /* 유튜브 앱 상단 메뉴바 (로고, 종 모양 알림, 돋보기) */
         .youtube-header {
             height: 50px;
@@ -122,7 +119,6 @@
             font-size: 20px;
             cursor: pointer;
         }
-
         /* [핵심 수정] 중간 영상 콘텐츠 피드 영역 (독립 스크롤 활성화) */
         .video-feed-area {
             flex: 1;
@@ -138,7 +134,6 @@
             background-color: rgba(255, 255, 255, 0.2);
             border-radius: 2px;
         }
-
         /* 개별 유튜브 영상 카드 컴포넌트 */
         .video-card {
             width: 100%;
@@ -201,7 +196,6 @@
             font-size: 12px;
             color: #aaaaaa; /* 작은 글씨 및 연한 회색 조합 */
         }
-
         /* 유튜브 하단 앱 탭바 */
         .youtube-footer-nav {
             height: 60px;
@@ -241,7 +235,6 @@
     </style>
 </head>
 <body>
-
     <!-- 갤럭시 스타일 스마트폰 프레임 -->
     <div class="phone-frame">
         
@@ -256,7 +249,6 @@
                 </div>
             </div>
         </div>
-
         <!-- 유튜브 헤더 영역 -->
         <header class="youtube-header">
             <div class="logo-area">
@@ -268,7 +260,6 @@
                 <span>🔍</span>
             </div>
         </header>
-
         <!-- [독립 모션 구동] 중간 영상 피드 스크롤 스크린 구역 -->
         <main class="video-feed-area">
             
@@ -287,7 +278,6 @@
                     </div>
                 </div>
             </a>
-
             <!-- 2. 홍콩 브이로그 -->
             <a href="https://youtu.be/J5TOPIN4S0w?si=41fO6dXxXxlF9lzc" class="video-card">
                 <div class="thumbnail-box">
@@ -303,7 +293,6 @@
                     </div>
                 </div>
             </a>
-
             <!-- 3. 오사카 브이로그 -->
             <a href="https://youtu.be/1RoGC3-4KZA?si=6Gs9svX-rmq1y_lL" class="video-card">
                 <div class="thumbnail-box">
@@ -319,9 +308,8 @@
                     </div>
                 </div>
             </a>
-
-   <!-- 4. 성민이의 먹방로그 -->
-            <a href="https://youtu.be" class="video-card">
+            <!-- 4. 성민이의 먹방로그 -->
+            <a href="https://youtu.be/I1mSQPVAGxk?si=P-vgdaaTMr8vRxN4" class="video-card">
                 <div class="thumbnail-box">
                     <img src="smlog.jpg" alt="썸네일" onerror="this.style.backgroundColor='#2a2a2a';">
                 </div>
@@ -335,9 +323,7 @@
                     </div>
                 </div>
             </a>
-
         </main>
-
         <!-- 유튜브 하단 앱 탭바 (홈 활성화 및 내 페이지 사람 아이콘 적용) -->
         <nav class="youtube-footer-nav">
             <div class="footer-item active">
@@ -360,8 +346,6 @@
                 <span>내 페이지</span>
             </div>
         </nav>
-
     </div>
-
 </body>
 </html>
