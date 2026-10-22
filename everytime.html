@@ -87,6 +87,8 @@ hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
 .mt .r { color: #e22; } .mt .r svg { stroke: #e22; }
 .mt .g { color: #0bc; } .mt .g svg { stroke: #0bc; }
 .th { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.th.ph { display: flex; align-items: center; justify-content: center; background: #f2f2f2; }
+.th.ph svg { stroke: #bbb; }
 .empty { text-align: center; color: #aaa; padding: 60px 0; font-size: 14px; }
 .fab { position: absolute; left: 50%; transform: translateX(-50%); bottom: 18px; display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #ddd; border-radius: 30px; padding: 11px 22px; font-weight: 700; font-size: 15px; box-shadow: 0 3px 12px rgba(0,0,0,.15); cursor: pointer; }
 .fab svg { stroke: #f5261a; width: 20px; height: 20px; }
@@ -191,6 +193,10 @@ hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
    FIREBASE_URL 이 비어 있으면 → 이 브라우저(localStorage)에만 저장됩니다.
    모든 방문자가 같은 글/댓글/계정을 보려면 Firebase Realtime Database 주소를 넣으세요.
    예) 'https://내프로젝트-default-rtdb.firebaseio.com'  (끝에 / 붙이지 않기)
+
+   [데이터 불러오기 방식]
+   - 자동 새로고침 없음. 로그인 / 게시판 입장 / 글 열기 / 쇼핑탭 열기 때만 서버에서 받아옵니다.
+   - 사진은 글 목록에서 받지 않고, 글을 열었을 때만 받아옵니다. (images 경로에 따로 저장)
    ================================================================ */
 var FIREBASE_URL = 'https://blossomnoodle-1f1b6-default-rtdb.asia-southeast1.firebasedatabase.app';
 
@@ -241,6 +247,7 @@ function vals(o) { return o ? Object.keys(o).map(function (k) { return o[k]; }) 
 
 /* ===================== 저장소 ===================== */
 var T = {};
+var LD = {}; // 게시판별 첫 불러오기 완료 여부
 function put(o, path, val) {
   var k = path.split('/'), c = o;
   for (var i = 0; i < k.length - 1; i++) { c = c[k[i]] = c[k[i]] || {}; }
@@ -248,13 +255,20 @@ function put(o, path, val) {
 }
 function saveLocal() { try { localStorage.setItem('eta_db', JSON.stringify(T)); } catch (e) { toast('저장 공간이 부족합니다.'); } }
 var Store = {
+  /* 내 브라우저 저장 방식일 때만 전체를 읽어옵니다 */
   load: async function () {
-    if (FIREBASE_URL) {
-      var r = await fetch(FIREBASE_URL + '/.json');
-      if (!r.ok) throw new Error('load failed');
-      T = (await r.json()) || {};
-    }
-    else { T = JSON.parse(localStorage.getItem('eta_db') || '{}'); }
+    if (!FIREBASE_URL) { T = JSON.parse(localStorage.getItem('eta_db') || '{}'); }
+  },
+  /* 서버에서 필요한 부분만 읽어옵니다 */
+  get: async function (path) {
+    var r = await fetch(FIREBASE_URL + '/' + path + '.json');
+    if (!r.ok) throw new Error('load failed');
+    return await r.json();
+  },
+  /* 서버에서 받아서 내 화면용 데이터(T)에 반영합니다 */
+  sync: async function (path) {
+    if (!FIREBASE_URL) return;
+    put(T, path, await Store.get(path));
   },
   set: async function (path, val) {
     if (FIREBASE_URL) {
@@ -301,7 +315,10 @@ function P() { return T.posts && T.posts[S.b] && T.posts[S.b][S.pid]; }
 function pp() { return 'posts/' + S.b + '/' + S.pid; }
 function toast(t) { var d = document.createElement('div'); d.className = 'toast'; d.textContent = t; $app.appendChild(d); setTimeout(function () { d.remove(); }, 1800); }
 function msg(t) { var m = $('#msg'); if (m) m.textContent = t; }
+function bad(t) { msg(t); var m = $('#msg'); if (m) m.className = 'msg'; }
 function isAdmin() { return S.u === ADMIN; }
+/* 지금 보는 글만 서버에서 다시 받기 (댓글/공감/투표 후) */
+async function syncPost() { try { await Store.sync(pp()); } catch (e) {} }
 
 /* ===================== 화면 ===================== */
 function head(title, sub, right) {
@@ -347,10 +364,12 @@ function vBoard() {
     if (cm) g += '<span class="g">' + ic('chat') + cm + '</span>';
     var parts = [g, shown(p.d), '익명'].filter(Boolean).join('<span>|</span>');
     var im = vals(p.img)[0];
-    return '<div class="pr" data-a="open" data-x="' + p._id + '"><div class="pm"><b>' + esc(p.title) + '</b><p>' + esc(p.body) + '</p><div class="mt">' + parts + '</div></div>' + (im ? '<img class="th" src="' + im + '">' : '') + '</div>';
+    var th = im ? '<img class="th" src="' + im + '">' : (p.ni ? '<div class="th ph">' + ic('cam') + '</div>' : '');
+    return '<div class="pr" data-a="open" data-x="' + p._id + '"><div class="pm"><b>' + esc(p.title) + '</b><p>' + esc(p.body) + '</p><div class="mt">' + parts + '</div></div>' + th + '</div>';
   }).join('');
+  var emp = (FIREBASE_URL && !LD[S.b]) ? '' : '<div class="empty">아직 게시물이 없어요.</div>';
   return head(BN[S.b], '비티대학교', '<button class="ib">' + ic('search') + '</button><button class="ib">' + ic('dots') + '</button>') +
-    '<div class="sc">' + (rows || '<div class="empty">아직 게시물이 없어요.</div>') + '<div style="height:80px"></div></div>' +
+    '<div class="sc">' + (rows || emp) + '<div style="height:80px"></div></div>' +
     '<button class="fab" data-a="newPost">' + ic('pen') + '글 쓰기</button>';
 }
 function anonMap(p) {
@@ -384,10 +403,15 @@ function vPost() {
   }
   var top = all.filter(function (c) { return !c.p; });
   var cl = top.map(function (c) { return cm(c) + all.filter(function (r) { return r.p === c._id; }).map(cm).join(''); }).join('<hr>');
+  /* 사진: 예전 글은 글 안에 들어 있고, 새 글은 images 경로에서 따로 받아옵니다 */
+  var imgs = vals(p.img);
+  if (!imgs.length) imgs = vals(T.images && T.images[S.b] && T.images[S.b][S.pid]);
+  var imgHtml = imgs.map(function (s) { return '<img class="pi" src="' + s + '">'; }).join('');
+  if (!imgs.length && p.ni) { for (var q = 0; q < p.ni; q++) imgHtml += '<div class="pi" style="height:180px;background:#f2f2f2"></div>'; }
   return head(BN[S.b], '비티대학교', '<button class="ib dim">' + ic('bell') + '</button><button class="ib" data-a="more" data-x="p">' + ic('dots') + '</button>') +
     '<div class="sc"><div class="pd"><div class="who"><i class="av"></i><div><b>익명</b>' + (p.d ? '<small>' + p.d + '</small>' : '<small>&nbsp;</small>') + '</div></div>' +
     '<h3>' + esc(p.title) + '</h3><div class="bd">' + esc(p.body) + '</div>' +
-    vals(p.img).map(function (s) { return '<img class="pi" src="' + s + '">'; }).join('') + (p.poll ? pollHtml(p) : '') +
+    imgHtml + (p.poll ? pollHtml(p) : '') +
     '<div class="abar"><button data-a="like" class="' + (liked ? 'liked' : '') + '">' + ic('thumb') + '공감 ' + lk + '</button><button>' + ic('chat') + '댓글 ' + all.length + '</button><button>' + ic('mark') + '스크랩</button></div></div>' +
     '<div class="cl">' + (cl ? '<div class="cw">' + cl + '</div>' : '') + '</div></div>' +
     '<div class="cp">' + (S.rt ? '<div class="rtn"><span>대댓글 작성 중</span><span data-a="cancelRt" style="cursor:pointer">취소 ✕</span></div>' : '') +
@@ -463,30 +487,57 @@ var A = {
   },
   login: async function () {
     var id = $('#id').value.trim(), pw = $('#pw').value;
-    try { await Store.load(); } catch (e) {}
+    if (!/^[A-Za-z0-9가-힣_-]+$/.test(id)) return bad('아이디 또는 비밀번호가 올바르지 않습니다.');
+    try { await Store.sync('users/' + id); } catch (e) { return bad('서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.'); }
     var u = T.users && T.users[id];
-    if (!u || u.pw !== pw) return msg('아이디 또는 비밀번호가 올바르지 않습니다.'), ($('#msg').className = 'msg');
+    if (!u || u.pw !== pw) return bad('아이디 또는 비밀번호가 올바르지 않습니다.');
     S.u = id; S.v = 'home'; S.ok = ''; render();
+    /* 로그인 직후 한 번만 글 목록(텍스트)을 받아 홈 화면을 채웁니다 */
+    try { await Store.sync('posts'); } catch (e) { toast('글을 불러오지 못했습니다.'); }
+    if (S.v === 'home') render(true);
   },
   signup: async function () {
     var id = $('#id').value.trim(), pw = $('#pw').value;
     if (id.length < 5) return msg('아이디는 5자 이상이어야 합니다.');
     if (!/^[A-Za-z0-9가-힣_-]+$/.test(id)) return msg('아이디는 영문, 숫자, 한글, _ , - 만 사용할 수 있습니다.');
     if (pw.length < 5) return msg('비밀번호는 5자 이상이어야 합니다.');
-    try { await Store.load(); } catch (e) {}
+    try { await Store.sync('users/' + id); } catch (e) { return msg('서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.'); }
     if (T.users && T.users[id]) return msg('중복인 아이디입니다. 다른 아이디를 입력해 주세요.');
     var saved = await Store.set('users/' + id, { pw: pw, t: Date.now() });
     if (saved === false) return msg('서버에 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
     S.v = 'login'; S.ok = '회원가입이 완료되었습니다. 로그인해 주세요.'; render();
   },
   tabHome: function () { S.v = 'home'; render(); },
-  tabShop: function () { if (!isAdmin()) return; S.v = 'shop'; render(); },
+  tabShop: async function () {
+    if (!isAdmin()) return;
+    S.v = 'shop'; render();
+    try { await Store.sync('users'); } catch (e) { toast('계정 목록을 불러오지 못했습니다.'); }
+    if (S.v === 'shop') render(true);
+  },
   delUser: function (id) {
     if (!isAdmin() || id === ADMIN) return;
     ask(async function () { await Store.set('users/' + id, null); render(true); });
   },
-  board: function (b) { S.b = b; S.v = 'board'; render(); },
-  open: function (id) { S.pid = id; S.v = 'post'; S.sel = []; S.rt = null; S.cx = ''; render(); },
+  /* 게시판에 들어갈 때: 그 게시판 글 목록(텍스트)만 새로 받기 */
+  board: async function (b) {
+    S.b = b; S.v = 'board'; render();
+    try { await Store.sync('posts/' + b); } catch (e) { toast('글을 불러오지 못했습니다.'); }
+    LD[b] = true;
+    if (S.v === 'board' && S.b === b) render(true);
+  },
+  /* 글을 열 때: 그 글과 그 글의 사진만 받기 */
+  open: async function (id) {
+    var b = S.b;
+    S.pid = id; S.v = 'post'; S.sel = []; S.rt = null; S.cx = ''; render();
+    var c = T.posts && T.posts[b] && T.posts[b][id];
+    var jobs = [Store.sync('posts/' + b + '/' + id)];
+    if (c && c.ni && !c.img) jobs.push(Store.sync('images/' + b + '/' + id));
+    try { await Promise.all(jobs); } catch (e) { toast('글을 불러오지 못했습니다.'); return; }
+    if (S.v === 'post' && S.pid === id && S.b === b) {
+      var a = document.activeElement;
+      if (!(a && a.id === 'ci')) render(true);
+    }
+  },
   newPost: function () { S.dr = { title: '', body: '', img: [], poll: null }; S.v = 'write'; render(); },
   cam: function () { if (S.dr.img.length >= 2) return toast('사진은 최대 2장까지 넣을 수 있어요.'); fi.click(); },
   rmImg: function (i) { S.dr.img.splice(+i, 1); render(true); },
@@ -501,16 +552,21 @@ var A = {
   },
   submit: async function () {
     if (!canPost()) return;
-    var d = S.dr, id = 'p' + Date.now(), p = { t: Date.now(), title: d.title.trim(), body: d.body.trim(), by: S.u, d: stamp() };
-    if (d.img.length) p.img = d.img.slice();
+    var d = S.dr, b = S.b, id = 'p' + Date.now(), p = { t: Date.now(), title: d.title.trim(), body: d.body.trim(), by: S.u, d: stamp() };
+    if (d.img.length) {
+      /* 사진은 글과 따로 저장해서 글 목록이 가벼워지게 합니다 */
+      var okI = await Store.set('images/' + b + '/' + id, d.img.slice());
+      if (okI === false) return;
+      p.ni = d.img.length;
+    }
     if (d.poll) p.poll = { o: d.poll.o.slice(), m: d.poll.m };
-    var saved = await Store.set('posts/' + S.b + '/' + id, p);
-    if (saved === false) return;
+    var saved = await Store.set('posts/' + b + '/' + id, p);
+    if (saved === false) { if (p.ni) await Store.set('images/' + b + '/' + id, null); return; }
     S.v = 'board'; render();
   },
   like: async function () {
     var p = P(); if (p.l && p.l[S.u]) return toast('이미 공감한 글입니다.');
-    await Store.set(pp() + '/l/' + S.u, 1); render(true);
+    await Store.set(pp() + '/l/' + S.u, 1); await syncPost(); render(true);
   },
   pick: function (i) {
     i = +i; var m = P().poll.m, k = S.sel.indexOf(i);
@@ -519,7 +575,7 @@ var A = {
   },
   vote: async function () {
     if (!S.sel.length) return;
-    await Store.set(pp() + '/poll/v/' + S.u, S.sel.slice().sort().join(',')); S.sel = []; render(true);
+    await Store.set(pp() + '/poll/v/' + S.u, S.sel.slice().sort().join(',')); S.sel = []; await syncPost(); render(true);
   },
   reply: function (cid) { var c = P().c[cid]; S.rt = c.p || cid; render(true); var i = $('#ci'); if (i) i.focus(); },
   cancelRt: function () { S.rt = null; render(true); },
@@ -528,12 +584,17 @@ var A = {
     var id = 'c' + Date.now() + Math.floor(Math.random() * 1000), c = { t: Date.now(), u: S.u, x: x, d: stamp() };
     if (S.rt) c.p = S.rt;
     S.cx = ''; S.rt = null;
-    await Store.set(pp() + '/c/' + id, c); render(true);
+    await Store.set(pp() + '/c/' + id, c); await syncPost(); render(true);
     var sc = $('.sc'); if (sc) sc.scrollTop = sc.scrollHeight;
   },
   more: function (x) {
     if (!isAdmin()) return;
-    if (x === 'p') ask(async function () { await Store.set(pp(), null); S.v = 'board'; render(); });
+    if (x === 'p') ask(async function () {
+      var b = S.b, id = S.pid;
+      await Store.set('posts/' + b + '/' + id, null);
+      await Store.set('images/' + b + '/' + id, null);
+      S.v = 'board'; render();
+    });
     else ask(async function () {
       var cs = P().c || {};
       for (var k in cs) if (k === x || cs[k].p === x) await Store.set(pp() + '/c/' + k, null);
@@ -561,20 +622,13 @@ $app.addEventListener('keydown', function (ev) {
   else if (ev.target.id === 'ci') A.send();
 });
 
-/* 공유 저장소 사용 시 주기적으로 새 글 불러오기 (화면을 보고 있을 때만, 30초마다) */
-if (FIREBASE_URL) {
-  setInterval(async function () {
-    if (document.hidden || ['home', 'board', 'post', 'shop'].indexOf(S.v) < 0) return;
-    var a = document.activeElement; if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) return;
-    var before = JSON.stringify(T);
-    try { await Store.load(); } catch (e) { return; }
-    if (JSON.stringify(T) !== before) render(true);
-  }, 30000);
-}
-
+/* 시작: 서버에서는 'seeded' 표시 하나만 확인합니다 (자동 새로고침 없음) */
 (async function () {
   var ok = true;
-  try { await Store.load(); } catch (e) { ok = false; toast('서버에 연결할 수 없습니다.'); }
+  try {
+    await Store.load();
+    if (FIREBASE_URL) T.seeded = await Store.get('seeded');
+  } catch (e) { ok = false; toast('서버에 연결할 수 없습니다.'); }
   if (ok && !T.seeded) { try { await Store.seed(); } catch (e) { toast('초기 데이터를 만들지 못했습니다.'); } }
   render();
 })();
