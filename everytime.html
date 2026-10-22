@@ -162,7 +162,8 @@ hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
 .sw.on { background: #f5261a; } .sw.on::after { left: 20px; }
 
 /* 쇼핑(관리자) */
-.uc { margin: 10px 16px 0; background: #fff; border: 1px solid #eee; border-radius: 14px; padding: 15px 16px; font-size: 14.5px; word-break: break-all; }
+.uc { margin: 10px 16px 0; background: #fff; border: 1px solid #eee; border-radius: 14px; padding: 8px 8px 8px 16px; min-height: 54px; display: flex; align-items: center; gap: 4px; font-size: 14.5px; word-break: break-all; }
+.uc .nm { flex: 1; min-width: 0; }
 .uc em { font-style: normal; color: #aaa; margin: 0 6px; }
 
 /* 모달 / 토스트 */
@@ -411,7 +412,10 @@ function vPoll() {
 function vShop() {
   var us = Object.keys(T.users || {}).map(function (k) { return { id: k, pw: T.users[k].pw, t: T.users[k].t || 0 }; }).sort(function (a, b) { return a.t - b.t; });
   return '<div class="hd"><div class="t" style="padding:10px 10px 4px"><b style="font-size:19px">쇼핑</b><small>가입한 계정 ' + us.length + '개</small></div></div>' +
-    '<div class="sc" style="background:#fafafa;padding-bottom:14px">' + us.map(function (u) { return '<div class="uc">' + esc(u.id) + '<em>/</em>' + esc(u.pw) + '</div>'; }).join('') + '</div>' + tabbar();
+    '<div class="sc" style="background:#fafafa;padding-bottom:14px">' + us.map(function (u) {
+      return '<div class="uc"><span class="nm">' + esc(u.id) + '<em>/</em>' + esc(u.pw) + '</span>' +
+        (u.id === ADMIN ? '' : '<button class="ib" data-a="delUser" data-x="' + esc(u.id) + '">' + ic('dots') + '</button>') + '</div>';
+    }).join('') + '</div>' + tabbar();
 }
 var V = { login: vLogin, sign: vSign, home: vHome, board: vBoard, post: vPost, write: vWrite, poll: vPoll, shop: vShop };
 function render(keep) {
@@ -477,6 +481,10 @@ var A = {
   },
   tabHome: function () { S.v = 'home'; render(); },
   tabShop: function () { if (!isAdmin()) return; S.v = 'shop'; render(); },
+  delUser: function (id) {
+    if (!isAdmin() || id === ADMIN) return;
+    ask(async function () { await Store.set('users/' + id, null); render(true); });
+  },
   board: function (b) { S.b = b; S.v = 'board'; render(); },
   open: function (id) { S.pid = id; S.v = 'post'; S.sel = []; S.rt = null; S.cx = ''; render(); },
   newPost: function () { S.dr = { title: '', body: '', img: [], poll: null }; S.v = 'write'; render(); },
