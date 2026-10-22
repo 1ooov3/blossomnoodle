@@ -26,6 +26,9 @@ button { font: inherit; color: inherit; }
 input, textarea { font: inherit; outline: none; border: 0; background: none; color: #222; width: 100%; }
 hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
 
+/* 비밀번호 칸: 점으로 가려서 표시 (브라우저 비밀번호 유출 경고 방지) */
+.pwf { -webkit-text-security: disc; }
+
 .hd { display: flex; align-items: center; gap: 2px; padding: 6px 8px 8px; flex-shrink: 0; }
 .hd .t { flex: 1; min-width: 0; padding-left: 6px; }
 .hd .t b { display: block; font-size: 16px; }
@@ -305,11 +308,11 @@ function head(title, sub, right) {
 }
 function vLogin() {
   return '<div class="sc cen"><svg viewBox="0 0 24 24" style="width:54px;height:54px;margin:0 auto;stroke:#222;stroke-width:2.6"><path d="M5 12a7 7 0 0014 0"/><circle cx="12" cy="6" r="1.2" fill="#f5261a" stroke="#f5261a"/></svg><h2>에브리타임</h2><div class="sch">비티대학교</div>' +
-    '<input id="id" placeholder="아이디" autocomplete="off"><input id="pw" type="password" placeholder="비밀번호">' +
+    '<input id="id" placeholder="아이디" autocomplete="off"><input id="pw" class="pwf" type="text" autocomplete="off" spellcheck="false" placeholder="비밀번호">' +
     '<div class="msg ok" id="msg">' + esc(S.ok) + '</div><button class="rb" data-a="login">로그인</button><button class="lk" data-a="goSign">회원가입</button></div>';
 }
 function vSign() {
-  return head('회원가입') + '<div class="sc cen" style="justify-content:flex-start;padding-top:30px"><input id="id" placeholder="아이디 (5자 이상)" autocomplete="off"><input id="pw" type="password" placeholder="비밀번호 (5자 이상)">' +
+  return head('회원가입') + '<div class="sc cen" style="justify-content:flex-start;padding-top:30px"><input id="id" placeholder="아이디 (5자 이상)" autocomplete="off"><input id="pw" class="pwf" type="text" autocomplete="off" spellcheck="false" placeholder="비밀번호 (5자 이상)">' +
     '<div class="note">※ 비밀번호는 관리자가 확인할 수 있습니다. 실제로 사용 중인 비밀번호는 입력하지 마세요.</div><div class="msg" id="msg"></div><button class="rb" data-a="signup">가입하기</button></div>';
 }
 function tabbar() {
@@ -550,15 +553,15 @@ $app.addEventListener('keydown', function (ev) {
   else if (ev.target.id === 'ci') A.send();
 });
 
-/* 공유 저장소 사용 시 주기적으로 새 글 불러오기 */
+/* 공유 저장소 사용 시 주기적으로 새 글 불러오기 (화면을 보고 있을 때만, 30초마다) */
 if (FIREBASE_URL) {
   setInterval(async function () {
-    if (['home', 'board', 'post', 'shop'].indexOf(S.v) < 0) return;
+    if (document.hidden || ['home', 'board', 'post', 'shop'].indexOf(S.v) < 0) return;
     var a = document.activeElement; if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) return;
     var before = JSON.stringify(T);
     try { await Store.load(); } catch (e) { return; }
     if (JSON.stringify(T) !== before) render(true);
-  }, 6000);
+  }, 30000);
 }
 
 (async function () {
